@@ -35,3 +35,20 @@ def plot_signals(X):
         ax.set_yticks([])
 
 
+""" Generating data
+num_sources = 6
+signal_length = 500
+t = linspace(0, 1, signal_length)
+S = np.c_[sawtooth(t), sine_wave(t, 0.3), square_wave(t, 0.4), triangle_wave(t, 0.25), np.random.randn(t.size)].T
+
+plot_signals(S)
+"""
+
+def make_mixtures(S, A):
+    """ (matrix, matrix) -> matrix
+    Returns the mixure of two matrixes
+    """
+                
+    return A*S
+
+
