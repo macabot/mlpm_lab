@@ -1,5 +1,6 @@
-import numpy as np
-import matplotlib.pyplot as plt
+from numpy import *
+from matplotlib.pyplot import *
+
 
 def sawtooth(x, period=0.2, amp=1.0, phase=0.):
     return (((x / period - phase - 0.5) % 1) - 0.5) * 2 * amp
@@ -29,20 +30,10 @@ def plot_signals(X):
     """
     figure()
     for i in range(X.shape[0]):
-        ax = plt.subplot(X.shape[0], 1, i + 1)
+        ax = subplot(X.shape[0], 1, i + 1)
         plot(X[i, :])
         ax.set_xticks([])
         ax.set_yticks([])
-
-
-""" Generating data
-num_sources = 6
-signal_length = 500
-t = linspace(0, 1, signal_length)
-S = np.c_[sawtooth(t), sine_wave(t, 0.3), square_wave(t, 0.4), triangle_wave(t, 0.25), np.random.randn(t.size)].T
-
-plot_signals(S)
-"""
 
 def make_mixtures(S, A):
     """ (matrix, matrix) -> matrix
@@ -50,4 +41,27 @@ def make_mixtures(S, A):
     """
                 
     return A*S
+
+def plot_histograms(X):
+    """
+    Plot the signals contained in the rows of X as a histogram
+    """
+    figure()
+    for i in range(X.shape[0]):
+        ax = subplot(X.shape[0], 1, i + 1)
+        hist(X[i, :], bins=20)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+
+""" Generating data  """
+num_sources = 6
+signal_length = 500
+t = np.linspace(0, 1, signal_length)
+S = np.c_[sawtooth(t), sine_wave(t, 0.3), square_wave(t, 0.4), triangle_wave(t, 0.25), np.random.randn(t.size), np.random.rand(t.size)].T
+
+plot_signals(S)
+plot_histograms(S)
+
+show()
 
