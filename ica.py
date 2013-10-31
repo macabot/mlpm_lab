@@ -51,6 +51,3 @@ def make_mixtures(S, A):
                 
     return A*S
 
-"""
-Lees dit! 
-"""
