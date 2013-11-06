@@ -38,6 +38,8 @@ def plot_signals(X):
 def make_mixtures(S, A):
     """ (matrix, matrix) -> matrix
     Returns the mixure of two matrixes
+
+    Assumes X and A are of type numpy matrix
     """
                 
     return A*S
@@ -52,6 +54,28 @@ def plot_histograms(X):
         hist(X[i, :], bins=20)
         ax.set_xticks([])
         ax.set_yticks([])
+
+def whiten(X):
+    """ (matrix) -> matrix
+
+    Given a matrix, this function will return the whitened form.
+    Whitening consists of decollerating the data points x
+
+    Assumes X is a numpy matrix
+    """
+
+    # Sigma holds the covariance of the matrix
+    Sigma = numpy.cov(X)
+
+    # Collumns of theta are eigenvalues of X
+    # Todo: replicate theta vector to a matrix by replicating columns
+    Theta = Sigma.diagonal() 
+
+
+    # Lamda holds the eigenvalues on its diagonal
+    Lambda = Theta.transpose() * Sigma * Theta
+
+    # part 3 of the document from coursera..
 
 
 """ Generating data  """
