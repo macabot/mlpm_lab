@@ -74,6 +74,30 @@ def whiten(data):
     phi = np.linalg.eig(covariance)[1]
     diag_lambda = np.diag(np.dot(np.dot(phi.T, covariance), phi))
     return np.dot(np.dot(np.diag(diag_lambda**-0.5), phi.T), data)
+    
+def plot_functions():
+    figure()
+    ranges = range(0,100)
+    print ranges
+    ranges = np.linspace(-1,1,100)
+    print ranges
+    outputs = np.c_[[1/cosh(x) for x in ranges],
+                    [-tanh(x) for x in ranges],
+               [exp(((-x**2)/2) + np.log(cosh(x)))for x in ranges],
+                    [-x+tanh(x) for x in ranges],
+               [exp(-x**4/4) for x in ranges],
+                    [-x**3 for x in ranges],
+               [(x**2+5)**-3 for x in ranges],
+                    [(-6*x)/(x**2)+5 for x in ranges]].T
+
+    for i in range(0,outputs.shape[0],2):
+        ax = subplot(outputs.shape[0], 1, i + 1)
+        plot(outputs[i])
+        plot(outputs[i+1])
+        ax.set_xticks([])
+        ax.set_yticks([])
+        
+    show()
 
 def test_whitening():
     data = np.random.randn(3, 1000000)*1000
@@ -90,4 +114,5 @@ def test_power():
 if __name__ == '__main__':
     test_whitening()
     #test_power()
+    #plot_functions()
 
