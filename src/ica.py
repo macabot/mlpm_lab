@@ -55,37 +55,33 @@ def plot_histograms(X):
         ax.set_xticks([])
         ax.set_yticks([])
 
-def whiten(X):
-    """ (matrix) -> matrix
+def generate_data():
+    """ Generating data  """
+    num_sources = 6
+    signal_length = 500
+    t = np.linspace(0, 1, signal_length)
+    S = np.c_[sawtooth(t), sine_wave(t, 0.3), square_wave(t, 0.4), triangle_wave(t, 0.25), np.random.randn(t.size), np.random.rand(t.size)].T
+    plot_signals(S)
+    plot_histograms(S)
 
-    Given a matrix, this function will return the whitened form.
-    Whitening consists of decollerating the data points x
+    show()
 
-    Assumes X is a numpy matrix
-    """
-
-    # Sigma holds the covariance of the matrix
-    Sigma = numpy.cov(X)
-
-    # Collumns of theta are eigenvalues of X
-    # Todo: replicate theta vector to a matrix by replicating columns
-    Theta = Sigma.diagonal() 
-
-
-    # Lamda holds the eigenvalues on its diagonal
-    Lambda = Theta.transpose() * Sigma * Theta
-
-    # part 3 of the document from coursera..
-
-
-""" Generating data  """
-num_sources = 6
-signal_length = 500
-t = np.linspace(0, 1, signal_length)
-S = np.c_[sawtooth(t), sine_wave(t, 0.3), square_wave(t, 0.4), triangle_wave(t, 0.25), np.random.randn(t.size), np.random.rand(t.size)].T
-
-plot_signals(S)
-plot_histograms(S)
-
-show()
-
+def whiten(data):
+    """whitening"""
+    covariance = np.cov(data)
+    # The columns of phi are the eigenvectors of the covariance matrix.
+    #eigenvalues, eigenvectors = np.linalg.eig(covariance)
+    #print 'val: %s' % eigenvalues
+    #print 'vec: %s' % eigenvectors
+    phi = np.linalg.eig(covariance)[1]
+    diag_lambda = np.dot(np.dot(phi.T, covariance), phi)
+    diag_lambda = np.diag(np.diag(diag_lambda))
+    print diag_lambda
+    
+def test_whitening():
+    #data = np.matrix([[1,1], [2,2], [3,0]]).T
+    data = np.random.randn(2, 1000000)*1000
+    whiten(data)
+    
+if __name__ == '__main__':
+    test_whitening()
