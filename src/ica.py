@@ -42,7 +42,7 @@ def make_mixtures(S, A):
     Assumes X and A are of type numpy matrix
     """
                 
-    return A*S
+    return dot(A, S)
 
 def plot_histograms(X):
     """
@@ -84,3 +84,4 @@ def test_whitening():
     
 if __name__ == '__main__':
     test_whitening()
+
