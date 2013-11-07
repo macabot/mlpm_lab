@@ -41,7 +41,7 @@ def make_mixtures(S, A):
 
     Assumes X and A are of type numpy matrix
     """
-                
+
     return dot(A, S)
 
 def plot_histograms(X):
@@ -67,21 +67,27 @@ def generate_data():
 
 def whiten(data):
     """whitening"""
+    mean = np.mean(data)
+    data -= mean
     covariance = np.cov(data)
     # The columns of phi are the eigenvectors of the covariance matrix.
-    #eigenvalues, eigenvectors = np.linalg.eig(covariance)
-    #print 'val: %s' % eigenvalues
-    #print 'vec: %s' % eigenvectors
     phi = np.linalg.eig(covariance)[1]
-    diag_lambda = np.dot(np.dot(phi.T, covariance), phi)
-    diag_lambda = np.diag(np.diag(diag_lambda))
-    print diag_lambda
-    
+    diag_lambda = np.diag(np.dot(np.dot(phi.T, covariance), phi))
+    return np.dot(np.dot(np.diag(diag_lambda**-0.5), phi.T), data)
+
 def test_whitening():
-    #data = np.matrix([[1,1], [2,2], [3,0]]).T
-    data = np.random.randn(2, 1000000)*1000
-    whiten(data)
-    
+    data = np.random.randn(3, 1000000)*1000
+    white_data = whiten(data)
+    white_covariance = np.cov(white_data)
+    white_covariance = np.diag(np.diag(white_covariance))
+    ax = imshow(white_covariance, cmap='gray', interpolation='nearest')
+    show()
+
+def test_power():
+    m = np.array([[1,2], [3,4]])
+    print m**-0.5
+
 if __name__ == '__main__':
     test_whitening()
+    #test_power()
 
