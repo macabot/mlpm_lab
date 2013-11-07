@@ -63,7 +63,6 @@ def generate_data():
     S = np.c_[sawtooth(t), sine_wave(t, 0.3), square_wave(t, 0.4), triangle_wave(t, 0.25), np.random.randn(t.size), np.random.rand(t.size)].T
     plot_signals(S)
     plot_histograms(S)
-
     show()
 
 def whiten(data):
