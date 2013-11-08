@@ -68,6 +68,7 @@ def generate_data():
     plot_histograms(S)
 
     show()
+    return S
 
 def whiten(data):
     """
@@ -142,10 +143,10 @@ def ICA(data, activation_function, learning_rate):
     # holds the difference between the new weights and the old
     difference = float('inf')
 
-    # defines the allowed difference between old and new weights
-    max_diff = 0.1
+    # defines the limit of difference between old and new weights
+    max_diff = 0.01
 
-    # white the data
+    # whiten the data
     data = whiten(data)
 
     while difference > max_diff:
@@ -157,9 +158,10 @@ def ICA(data, activation_function, learning_rate):
         data_prime = np.dot(demixer.T, linmap_data)
         # adjust the weights
         demixer_diff = learning_rate * \
-                       (demixer + np.dot(nonlinmap_data, data_prime.T))
+                       (np.dot(nonlinmap_data, data_prime.T))
         difference = np.sum(np.absolute(demixer_diff))
         demixer += demixer_diff
+        print(demixer)
         
     return demixer
     
@@ -167,11 +169,32 @@ def test_ICA():
     """
     Test the ICA function
     """
-    data = np.random.randn(3, 1000) * 1000
-    activation_function = (lambda a: -tanh(a))
-    learning_rate = 0.1
-    print ICA(data, activation_function, learning_rate)
 
+    # the activation function used in ica and its learning rate
+    activation_function = (lambda a: -tanh(a))
+    learning_rate = 0.00001
+
+    # create data
+    data = generate_data()  
+    
+    # remove random stuff to make stuff easier (also to check..)
+    data = np.delete(data, -1, 0)
+    data = np.delete(data, -1, 0)
+
+    # mix data
+    mixer = np.random.randn(data.shape[0], data.shape[0])
+    mixed_data = make_mixtures(data, np.random.randn(data.shape[0], data.shape[0]))
+
+    # perform ICA
+    demixer = ICA(mixed_data, activation_function, learning_rate)
+
+    # compare data
+    demixed_data = np.dot(demixer,  mixed_data)
+
+    plot_signals(whiten(data))
+    plot_signals(demixed_data)
+
+    show()
 
 def test_power():
     """
