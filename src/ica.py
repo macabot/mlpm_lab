@@ -134,10 +134,22 @@ def ICA(data, activation_function, learning_rate):
     Independent Component Analysis
     TODO fix
     """
-    data = whiten(data)
+
+    # holds our best guess of the demixer
     demixer = random_nonsingular_matrix(len(data))
+
+    # the difference of the real demixer and our demixer
     difference = float('inf')
+
+    # maximum difference we allow the demixer to be from the real
     max_diff = 0.1
+
+    # whiten the data
+    data = whiten(data)
+
+    covar = np.dov(data)
+    imshow(covar, cmap='gray', interpolation='nearest')
+
     while difference > max_diff:
         # put data through a linear mapping
         linmap_data = np.dot(demixer, data)
