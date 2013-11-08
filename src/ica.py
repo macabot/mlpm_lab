@@ -116,6 +116,28 @@ def plot_functions():
         ax.set_yticks([])
         
     show()
+    
+def ICA(data, activation_function, learning_rate):
+    """
+    Independent Component Analysis
+    TODO fix
+    """
+    demixer = random_nonsingular_matrix(len(data))
+    difference = float('inf')
+    max_diff = 0.1
+    while difference > max_diff:
+        # put data through a linear mapping
+        linmap_data = np.dot(demixer, data)
+        # put it through a nonlinear map
+        nonlinmap_data = activation_function(linmap_data)
+        # put it back through W
+        data_prime = np.dot(demixer.T, linmap_data)
+        # adjust the weights
+        new_demixer = demixer + np.dot(nonlinmap_data, data_prime.T)
+        difference = np.sum(np.absolute(demixer - new_demixer))
+        demixer = new_demixer
+        
+    return demixer
 
 def test_whitening():
     """
