@@ -89,7 +89,6 @@ def whiten(data):
 def plot_functions():
     """
     Plots the four activation functions calculated in assignments
-    Todo: check
     """
 
     figure()
@@ -118,7 +117,19 @@ def plot_functions():
         ax.set_yticks([])
         
     show()
-    
+
+def test_whitening():
+    """
+    Tests the whitening function
+    """
+
+    data = np.random.randn(3, 1000000)*1000
+    white_data = whiten(data)
+    white_covariance = np.cov(white_data)
+    #white_covariance = np.diag(np.diag(white_covariance)) this will always end up as a diagonal matrix, thus a bad test
+    ax = imshow(white_covariance, cmap='gray', interpolation='nearest')
+    show()
+   
 def ICA(data, activation_function, learning_rate):
     """
     Independent Component Analysis
@@ -152,17 +163,10 @@ def test_ICA():
     learning_rate = 0.1
     print ICA(data, activation_function, learning_rate)
 
-def test_whitening():
+def test_ica():
     """
-    Tests the whitening function
+    Tests the ICA funtion
     """
-
-    data = np.random.randn(3, 1000000)*1000
-    white_data = whiten(data)
-    white_covariance = np.cov(white_data)
-    #white_covariance = np.diag(np.diag(white_covariance)) this will always end up as a diagonal matrix, thus a bad test
-    ax = imshow(white_covariance, cmap='gray', interpolation='nearest')
-    show()
 
 def test_power():
     """
