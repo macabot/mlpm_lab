@@ -126,6 +126,7 @@ def test_whitening():
     data = np.random.randn(3, 1000000)*1000
     white_data = whiten(data)
     white_covariance = np.cov(white_data)
+    white_covariance = np.diag(np.diag(white_covariance)) 
     ax = imshow(white_covariance, cmap='gray', interpolation='nearest')
     show()
    
@@ -134,21 +135,18 @@ def ICA(data, activation_function, learning_rate):
     Independent Component Analysis
     TODO fix
     """
-
-    # holds our best guess of the demixer
+    
+    # holds our best guess of the correct weights for demixing
     demixer = random_nonsingular_matrix(len(data))
 
-    # the difference of the real demixer and our demixer
+    # holds the difference between the new weights and the old
     difference = float('inf')
 
-    # maximum difference we allow the demixer to be from the real
+    # defines the allowed difference between old and new weights
     max_diff = 0.1
 
-    # whiten the data
+    # white the data
     data = whiten(data)
-
-    covar = np.dov(data)
-    imshow(covar, cmap='gray', interpolation='nearest')
 
     while difference > max_diff:
         # put data through a linear mapping
