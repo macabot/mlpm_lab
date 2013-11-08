@@ -124,6 +124,7 @@ def ICA(data, activation_function, learning_rate):
     Independent Component Analysis
     TODO fix
     """
+    data = whiten(data)
     demixer = random_nonsingular_matrix(len(data))
     difference = float('inf')
     max_diff = 0.1
@@ -135,11 +136,21 @@ def ICA(data, activation_function, learning_rate):
         # put it back through W
         data_prime = np.dot(demixer.T, linmap_data)
         # adjust the weights
-        new_demixer = demixer + np.dot(nonlinmap_data, data_prime.T)
-        difference = np.sum(np.absolute(demixer - new_demixer))
-        demixer = new_demixer
+        demixer_diff = learning_rate * \
+                       (demixer + np.dot(nonlinmap_data, data_prime.T))
+        difference = np.sum(np.absolute(demixer_diff))
+        demixer += demixer_diff
         
     return demixer
+    
+def test_ICA():
+    """
+    Test the ICA function
+    """
+    data = np.random.randn(3, 1000) * 1000
+    activation_function = (lambda a: -tanh(a))
+    learning_rate = 0.1
+    print ICA(data, activation_function, learning_rate)
 
 def test_whitening():
     """
@@ -162,7 +173,8 @@ def test_power():
     print m**-0.5
 
 if __name__ == '__main__':
+    test_ICA()
     #test_whitening()
     #test_power()
-    plot_functions()
+    #plot_functions()
 
