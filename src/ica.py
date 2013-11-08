@@ -38,8 +38,6 @@ def plot_signals(X):
 def make_mixtures(S, A):
     """ (matrix, matrix) -> matrix
     Returns the mixure of two matrixes
-
-    Assumes X and A are of type numpy matrix
     """
 
     return dot(A, S)
@@ -56,26 +54,45 @@ def plot_histograms(X):
         ax.set_yticks([])
 
 def generate_data():
-    """ Generating data  """
-    num_sources = 6
+    """ 
+    Generating data test function
+    """
+
+    # create signals
     signal_length = 500
     t = np.linspace(0, 1, signal_length)
     S = np.c_[sawtooth(t), sine_wave(t, 0.3), square_wave(t, 0.4), triangle_wave(t, 0.25), np.random.randn(t.size), np.random.rand(t.size)].T
+
+    # plots signals
     plot_signals(S)
     plot_histograms(S)
+
     show()
 
 def whiten(data):
-    """whitening"""
+    """
+    whitening
+    """
+
+    # get cov of zero mean data
     mean = np.mean(data)
     data -= mean
     covariance = np.cov(data)
+
     # The columns of phi are the eigenvectors of the covariance matrix.
     phi = np.linalg.eig(covariance)[1]
+
+    # create lamda
     diag_lambda = np.diag(np.dot(np.dot(phi.T, covariance), phi))
     return np.dot(np.dot(np.diag(diag_lambda**-0.5), phi.T), data)
     
 def plot_functions():
+    """
+    Plots the four activation functions calculated in assignments
+    Todo: check
+    """
+
+    # create functions
     figure()
     ranges = range(0,100)
     print ranges
@@ -90,6 +107,7 @@ def plot_functions():
                [(x**2+5)**-3 for x in ranges],
                     [(-6*x)/(x**2)+5 for x in ranges]].T
 
+    # plot functions
     for i in range(0,outputs.shape[0],2):
         ax = subplot(outputs.shape[0], 1, i + 1)
         plot(outputs[i])
@@ -100,6 +118,10 @@ def plot_functions():
     show()
 
 def test_whitening():
+    """
+    Tests the whitening function
+    """
+
     data = np.random.randn(3, 1000000)*1000
     white_data = whiten(data)
     white_covariance = np.cov(white_data)
@@ -108,6 +130,10 @@ def test_whitening():
     show()
 
 def test_power():
+    """
+    Tests to the power behaviour op numpy
+    """
+
     m = np.array([[1,2], [3,4]])
     print m**-0.5
 
