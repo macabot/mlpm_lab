@@ -103,7 +103,7 @@ def test_whitening():
     data = np.random.randn(3, 1000000)*1000
     white_data = whiten(data)
     white_covariance = np.cov(white_data)
-    white_covariance = np.diag(np.diag(white_covariance))
+    #white_covariance = np.diag(np.diag(white_covariance)) this will always end up as a diagonal matrix, thus a bad test
     ax = imshow(white_covariance, cmap='gray', interpolation='nearest')
     show()
 
