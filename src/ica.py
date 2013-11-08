@@ -92,12 +92,11 @@ def plot_functions():
     Todo: check
     """
 
-    # create functions
     figure()
+
+    # create functions
     ranges = range(0,100)
-    print ranges
     ranges = np.linspace(-1,1,100)
-    print ranges
     outputs = np.c_[[1/cosh(x) for x in ranges],
                     [-tanh(x) for x in ranges],
                [exp(((-x**2)/2) + np.log(cosh(x)))for x in ranges],
@@ -109,8 +108,11 @@ def plot_functions():
 
     # plot functions
     for i in range(0,outputs.shape[0],2):
-        ax = subplot(outputs.shape[0], 1, i + 1)
+        ax = subplot(outputs.shape[0]*2, 2, i + 1)
         plot(outputs[i])
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax = subplot(outputs.shape[0]*2, 2, i + 2)
         plot(outputs[i+1])
         ax.set_xticks([])
         ax.set_yticks([])
@@ -160,7 +162,7 @@ def test_power():
     print m**-0.5
 
 if __name__ == '__main__':
-    test_whitening()
+    #test_whitening()
     #test_power()
-    #plot_functions()
+    plot_functions()
 
