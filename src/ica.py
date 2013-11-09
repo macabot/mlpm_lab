@@ -130,7 +130,52 @@ def test_whitening():
     white_covariance = np.diag(np.diag(white_covariance)) 
     ax = imshow(white_covariance, cmap='gray', interpolation='nearest')
     show()
-   
+    
+def ICA_mod(data, activation_function, learning_rate):
+    """
+    Independent Component Analysis
+    TODO fix
+    """
+    
+    # holds our best guess of the correct weights for demixing
+    demixer = _sym_decorrelation(random_nonsingular_matrix(len(data)))
+
+    # holds the difference between the new weights and the old
+    difference = float('inf')
+
+    # defines the limit of difference between old and new weights
+    max_diff = 0.0000001
+
+    # whiten the data
+    data = whiten(data)
+    n, p = data.shape
+    
+    while difference > max_diff:
+        # put data through a linear mapping
+        linmap_data = np.dot(demixer, data)
+        # put it through a nonlinear map
+        nonlinmap_data = activation_function(linmap_data)
+        # put it back through W
+        data_prime = np.dot(demixer.T, linmap_data)
+        # adjust the weights
+        demixer1 = np.dot(nonlinmap_data, data.T)/float(p) - np.dot(np.diag(data_prime.mean(axis=1)), demixer)
+        demixer1 = _sym_decorrelation(demixer1)
+        difference = max(abs(abs(np.diag(np.dot(demixer1,demixer.T)))-1))
+        demixer = demixer1
+        print(demixer)
+        
+    return demixer
+
+def _sym_decorrelation(W):
+    """ Symmetric decorrelation """
+    K = np.dot(W, W.T)
+    s, u = linalg.eigh(K)
+    # u (resp. s) contains the eigenvectors (resp. square roots of
+    # the eigenvalues) of W * W.T
+    u, W = [np.asmatrix(e) for e in (u, W)]
+    W = (u * np.diag(1.0/np.sqrt(s)) * u.T) * W # W = (W * W.T) ^{-1/2} * W
+    return np.asarray(W)
+
 def ICA(data, activation_function, learning_rate):
     """
     Independent Component Analysis
@@ -186,7 +231,7 @@ def test_ICA():
     mixed_data = make_mixtures(data, np.random.randn(data.shape[0], data.shape[0]))
 
     # perform ICA
-    demixer = ICA(mixed_data, activation_function, learning_rate)
+    demixer = ICA_mod(mixed_data, activation_function, learning_rate)
 
     # compare data
     demixed_data = np.dot(demixer,  mixed_data)
