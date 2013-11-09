@@ -144,13 +144,13 @@ def ICA_mod(data, activation_function, learning_rate):
     difference = float('inf')
 
     # defines the limit of difference between old and new weights
-    max_diff = 0.0000001
+    max_diff = 1e-10
 
     # whiten the data
-    data = whiten(data)
+    data , _= whiten2(data)
     n, p = data.shape
-    
-    while difference > max_diff:
+    it = 0
+    while difference > max_diff and it <  15000:
         # put data through a linear mapping
         linmap_data = np.dot(demixer, data)
         # put it through a nonlinear map
@@ -158,14 +158,29 @@ def ICA_mod(data, activation_function, learning_rate):
         # put it back through W
         data_prime = np.dot(demixer.T, linmap_data)
         # adjust the weights
-        demixer1 = np.dot(nonlinmap_data, data.T)/float(p) - np.dot(np.diag(data_prime.mean(axis=1)), demixer)
+        demixer1 = np.dot(nonlinmap_data, data.T)/float(p) - learning_rate * np.dot(np.diag(data_prime.mean(axis=1)), demixer)
         demixer1 = _sym_decorrelation(demixer1)
         difference = max(abs(abs(np.diag(np.dot(demixer1,demixer.T)))-1))
         demixer = demixer1
-        print(demixer)
+        it +=1 
+        #print(demixer)
         
     return demixer
+    
+def whiten2(X):
+    # Centering the columns (ie the variables)
+    X = X - X.mean(axis=-1)[:, np.newaxis]
 
+    # Whitening and preprocessing by PCA
+    u, d, _ = linalg.svd(X, full_matrices=False)
+    del _
+    components = min(X.shape)
+    K = (u/d).T[:components] # see (6.33) p.140
+    del u, d
+    X1 = np.dot(K, X) # see (13.6) p.267 Here X1 is white and data
+    # in X has been projected onto a subspace by PCA
+    return X1, K
+    
 def _sym_decorrelation(W):
     """ Symmetric decorrelation """
     K = np.dot(W, W.T)
@@ -231,11 +246,12 @@ def test_ICA():
     mixed_data = make_mixtures(data, np.random.randn(data.shape[0], data.shape[0]))
 
     # perform ICA
-    demixer = ICA_mod(mixed_data, activation_function, learning_rate)
+    demixer = ICA(mixed_data, activation_function, learning_rate)
 
     # compare data
-    demixed_data = np.dot(demixer,  mixed_data)
-
+    _, K = whiten2(mixed_data)
+    #demixed_data = np.dot(demixer,  mixed_data)
+    demixed_data = np.dot(np.dot(demixer, K), mixed_data)
     plot_signals(whiten(data))
     plot_signals(demixed_data)
 
