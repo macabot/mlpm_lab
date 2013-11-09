@@ -246,7 +246,7 @@ def test_ICA():
     mixed_data = make_mixtures(data, np.random.randn(data.shape[0], data.shape[0]))
 
     # perform ICA
-    demixer = ICA(mixed_data, activation_function, learning_rate)
+    demixer = ICA_mod(mixed_data, activation_function, learning_rate)
 
     # compare data
     _, K = whiten2(mixed_data)
