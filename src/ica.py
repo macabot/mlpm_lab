@@ -287,7 +287,7 @@ def plot_scatter(data,title):
         ax.set_yticks([])
         
         
-    show()
+    draw()
     
 
 
