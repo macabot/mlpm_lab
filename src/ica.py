@@ -163,7 +163,7 @@ def ICA(data, activation_function, learning_rate):
 
     print("Running activation function: " + str(activation_function))
     #while difference > max_diff and it < 5000: 
-    while it < 15000 and diff > max_diff:
+    while it < 5000 and diff > max_diff:
         # put data through a linear mapping
         linmap_data = np.dot(demixer, data)
 
