@@ -301,7 +301,7 @@ if __name__ == '__main__':
     #test_whitening()
     #test_power()
     #plot_functions()
-    #test_ICA()
-    #test_activations()
     test_ICA()
+    #test_activations()
+    #demix_audio()
 
