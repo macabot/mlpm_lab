@@ -2,6 +2,7 @@ from numpy import *
 from matplotlib.pyplot import *
 import scipy.io.wavfile
 import scipy.integrate
+import scipy.stats
 
 def save_wav(data, out_file, rate):
     scaled = np.int16(data / np.max(np.abs(data)) * 32767)
@@ -337,6 +338,31 @@ def normalize_priors():
         norms[i] = 1.0 / scipy.integrate.quad(prior, -np.inf, np.inf)[0]
 
     print norms
+    
+def kurtosis():
+    data = generate_data()
+    print 'dummy signals'
+    print scipy.stats.kurtosis(data, axis=1, fisher=True)
+    # output:
+    # [-1.19640244 -1.48287113 -1.84019701 -1.2000384 ]
+    
+    # Load audio sources
+    source_files = ['beet.wav', 'beet9.wav', 'beet92.wav', 'mike.wav', 'street.wav']
+    wav_data = []
+    sample_rate = None
+    for f in source_files:
+        sr, data = scipy.io.wavfile.read('../data/' + f)
+        if sample_rate is None:
+            sample_rate = sr
+        else:
+            assert(sample_rate == sr)
+
+        wav_data.append(data[:190000]) 
+        
+    print 'real audio signals'
+    print scipy.stats.kurtosis(wav_data, axis=1, fisher=True)
+    # output
+    # [ 1.79431517 2.06885064 1.93609295 5.05191721 0.53887581 ]
 
 
 if __name__ == '__main__':
@@ -348,5 +374,6 @@ if __name__ == '__main__':
     #demix_audio()
     #scatter_plots()
     #test_ICA()
-    normalize_priors()
+    #normalize_priors()
+    kurtosis()
 
