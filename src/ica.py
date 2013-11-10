@@ -6,6 +6,7 @@ def save_wav(data, out_file, rate):
     scaled = np.int16(data / np.max(np.abs(data)) * 32767)
     scipy.io.wavfile.write(out_file, rate, scaled)          
 
+
 def sawtooth(x, period=0.2, amp=1.0, phase=0.):
     return (((x / period - phase - 0.5) % 1) - 0.5) * 2 * amp
 
@@ -144,14 +145,15 @@ def ICA(data, activation_function, learning_rate):
     difference = float('inf')
     # defines the limit of difference between old and new weights
     max_diff = 1e-3
-    # holds our best guess of the correct weights for demixing
-    demixer = random_nonsingular_matrix(data.shape[0])
-    # holds the difference in weights
-    diff = float('inf')
-
+    
+    #scatter data:
+    plot_scatter(data, "Mixed data")
+    
     # whiten the data
     data = whiten(data)
 
+    plot_scatter(data, "Whitened data")
+    
     # contribution of each data point
     N = 1./data.shape[1]
     it = 0 # current iteration
@@ -196,6 +198,8 @@ def test_ICA():
 
     # plot results
     plot_signals(sources)
+    plot_scatter(sources,"Demixed data")
+
     show()
 
 def test_power():
@@ -230,6 +234,7 @@ def test_activations():
 
     show() 
 
+
 def demix_audio():
     """
     The audio demixing assignment in notebook
@@ -254,7 +259,9 @@ def demix_audio():
             sample_rate = sr
         else:
             assert(sample_rate == sr)
+
         wav_data.append(data[:190000]) 
+
 
     # Create source and measurement data
     S = np.c_[wav_data]
@@ -264,14 +271,25 @@ def demix_audio():
         demixed.append(ICA(S, act_func, learning_rate))
  
     return demixed
-    """
-    # save files away
-    for i in range(demixed.shape[0]):
-        for j in range(demixed.shape[1]):
-            save_wav('../../' + demixed[i, :], 'demixed' + str(i) + str(j) + '.wav', sample_rate)
-    """
+
                 
-          
+def plot_scatter(data,title):
+    figure()
+    print data
+    
+    for i in range(0,len(data)):
+        ax = subplot(data.shape[0], 1, i + 1)
+        if i == 0:
+            ax.set_title(title)
+        x = range(0, len(data[i]))
+        scatter(x, data[i])
+        ax.set_xticks([])
+        ax.set_yticks([])
+        
+        
+    show()
+    
+
 
 if __name__ == '__main__':
     #test_whitening()
@@ -279,5 +297,5 @@ if __name__ == '__main__':
     #plot_functions()
     #test_ICA()
     #test_activations()
-    demix_audio()
+    test_ICA()
 
