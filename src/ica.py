@@ -253,7 +253,7 @@ def demix_audio():
     demixed = []
 
     # Load audio sources
-    source_files = ['X0.wav', 'X1.wav', 'X2.wav', 'X3.wav', 'X4.wav']
+    source_files = ['X0.wav', 'X1.wav']
     wav_data = []
     sample_rate = None
     for f in source_files:
@@ -263,7 +263,8 @@ def demix_audio():
         else:
             assert(sample_rate == sr)
 
-        wav_data.append(data[:190000]) 
+
+        wav_data.append(data[:50000]) 
 
 
     # Create source and measurement data
@@ -273,8 +274,10 @@ def demix_audio():
     for act_func in act_funcs:
         demixed.append(ICA(S, act_func, learning_rate))
  
-    return demixed
-
+    # save files away
+    for i in range(len(demixed)):
+        for j in range(demixed[i].shape[0]):
+            save_wav(demixed[i][j], '../../demixed' + str(i) + str(j) + '.wav', sample_rate)
                 
 def plot_scatter(data,title):
     figure()
