@@ -253,7 +253,7 @@ def demix_audio():
     demixed = []
 
     # Load audio sources
-    source_files = ['X0.wav', 'X1.wav']
+    source_files = ['X0.wav', 'X1.wav', 'X2.wav', 'X3.wav', 'X4.wav']
     wav_data = []
     sample_rate = None
     for f in source_files:
