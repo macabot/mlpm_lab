@@ -61,13 +61,13 @@ def generate_data():
     # create signals
     signal_length = 500
     t = np.linspace(0, 1, signal_length)
-    S = np.c_[sawtooth(t), sine_wave(t, 0.3), square_wave(t, 0.4), triangle_wave(t, 0.25), np.random.randn(t.size), np.random.rand(t.size)].T
+    S = np.c_[sawtooth(t), sine_wave(t, 0.3), square_wave(t, 0.4), triangle_wave(t, 0.25)].T
 
     # plots signals
-    plot_signals(S)
-    plot_histograms(S)
+    # plot_signals(S)
+    # plot_histograms(S)
 
-    show()
+    # show()
     return S
 
 def whiten(data):
@@ -130,131 +130,63 @@ def test_whitening():
     white_covariance = np.diag(np.diag(white_covariance)) 
     ax = imshow(white_covariance, cmap='gray', interpolation='nearest')
     show()
-    
-def ICA_mod(data, activation_function, learning_rate):
-    """
-    Independent Component Analysis
-    TODO fix
-    """
-    
-    # holds our best guess of the correct weights for demixing
-    demixer = _sym_decorrelation(random_nonsingular_matrix(len(data)))
-
-    # holds the difference between the new weights and the old
-    difference = float('inf')
-
-    # defines the limit of difference between old and new weights
-    max_diff = 1e-10
-
-    # whiten the data
-    data , _= whiten2(data)
-    n, p = data.shape
-    it = 0
-    while difference > max_diff and it <  15000:
-        # put data through a linear mapping
-        linmap_data = np.dot(demixer, data)
-        # put it through a nonlinear map
-        nonlinmap_data = activation_function(linmap_data)
-        # put it back through W
-        data_prime = np.dot(demixer.T, linmap_data)
-        # adjust the weights
-        demixer1 = np.dot(nonlinmap_data, data.T)/float(p) - learning_rate * np.dot(np.diag(data_prime.mean(axis=1)), demixer)
-        demixer1 = _sym_decorrelation(demixer1)
-        difference = max(abs(abs(np.diag(np.dot(demixer1,demixer.T)))-1))
-        demixer = demixer1
-        it +=1 
-        #print(demixer)
-        
-    return demixer
-    
-def whiten2(X):
-    # Centering the columns (ie the variables)
-    X = X - X.mean(axis=-1)[:, np.newaxis]
-
-    # Whitening and preprocessing by PCA
-    u, d, _ = linalg.svd(X, full_matrices=False)
-    del _
-    components = min(X.shape)
-    K = (u/d).T[:components] # see (6.33) p.140
-    del u, d
-    X1 = np.dot(K, X) # see (13.6) p.267 Here X1 is white and data
-    # in X has been projected onto a subspace by PCA
-    return X1, K
-    
-def _sym_decorrelation(W):
-    """ Symmetric decorrelation """
-    K = np.dot(W, W.T)
-    s, u = linalg.eigh(K)
-    # u (resp. s) contains the eigenvectors (resp. square roots of
-    # the eigenvalues) of W * W.T
-    u, W = [np.asmatrix(e) for e in (u, W)]
-    W = (u * np.diag(1.0/np.sqrt(s)) * u.T) * W # W = (W * W.T) ^{-1/2} * W
-    return np.asarray(W)
 
 def ICA(data, activation_function, learning_rate):
     """
     Independent Component Analysis
-    TODO fix
+    TODO: add difference function and include in while loop
     """
-    
-    # holds our best guess of the correct weights for demixing
-    demixer = random_nonsingular_matrix(len(data))
 
     # holds the difference between the new weights and the old
     difference = float('inf')
-
     # defines the limit of difference between old and new weights
-    max_diff = 0.01
+    max_diff = 0.01 # not used atm
+    # holds our best guess of the correct weights for demixing
+    demixer = random_nonsingular_matrix(data.shape[0])
 
     # whiten the data
     data = whiten(data)
 
-    while difference > max_diff:
+    # contribution of each data point
+    N = 1./data.shape[1]
+    it = 0 # current iteration
+
+    #while difference > max_diff and it < 5000: 
+    while it < 200:
         # put data through a linear mapping
         linmap_data = np.dot(demixer, data)
+
         # put it through a nonlinear map
         nonlinmap_data = activation_function(linmap_data)
+
         # put it back through W
         data_prime = np.dot(demixer.T, linmap_data)
+
         # adjust the weights
-        demixer_diff = learning_rate * \
+        demixer_diff = demixer + N * \
                        (np.dot(nonlinmap_data, data_prime.T))
         difference = np.sum(np.absolute(demixer_diff))
-        demixer += demixer_diff
-        print(demixer)
+        demixer += learning_rate * demixer_diff
         
-    return demixer
-    
-def test_ICA():
-    """
-    Test the ICA function
-    """
+        it += 1
 
-    # the activation function used in ica and its learning rate
-    activation_function = (lambda a: -tanh(a))
-    learning_rate = 0.00001
+    return np.dot(demixer, data)
+     
+def test_ICA():
+    """ Tests the ICA method """
+    # define parameters
+    learning_rate = 0.1
+    activation_function = (lambda a: -a + tanh(a))
 
     # create data
-    data = generate_data()  
-    
-    # remove random stuff to make stuff easier (also to check..)
-    data = np.delete(data, -1, 0)
-    data = np.delete(data, -1, 0)
+    data = generate_data()
+    mixed_data = np.dot(random_nonsingular_matrix(data.shape[0]), data)
 
-    # mix data
-    mixer = np.random.randn(data.shape[0], data.shape[0])
-    mixed_data = make_mixtures(data, np.random.randn(data.shape[0], data.shape[0]))
+    # perform ica
+    a = ICA(mixed_data, activation_function, learning_rate)
 
-    # perform ICA
-    demixer = ICA_mod(mixed_data, activation_function, learning_rate)
-
-    # compare data
-    _, K = whiten2(mixed_data)
-    #demixed_data = np.dot(demixer,  mixed_data)
-    demixed_data = np.dot(np.dot(demixer, K), mixed_data)
-    plot_signals(whiten(data))
-    plot_signals(demixed_data)
-
+    # plot results
+    plot_signals(a)
     show()
 
 def test_power():
