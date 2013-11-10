@@ -1,10 +1,11 @@
 from numpy import *
 from matplotlib.pyplot import *
 import scipy.io.wavfile
+import scipy.integrate
 
 def save_wav(data, out_file, rate):
     scaled = np.int16(data / np.max(np.abs(data)) * 32767)
-    scipy.io.wavfile.write(out_file, rate, scaled)          
+    scipy.io.wavfile.write(out_file, rate, scaled)
 
 
 def sawtooth(x, period=0.2, amp=1.0, phase=0.):
@@ -59,7 +60,7 @@ def plot_histograms(X):
         ax.set_yticks([])
 
 def generate_data():
-    """ 
+    """
     Generating data test function
     """
 
@@ -91,7 +92,7 @@ def whiten(data):
     # create lamda
     diag_lambda = np.diag(np.dot(np.dot(phi.T, covariance), phi))
     return np.dot(np.dot(np.diag(diag_lambda**-0.5), phi.T), data)
-    
+
 def plot_functions():
     """
     Plots the four activation functions calculated in assignments
@@ -121,7 +122,7 @@ def plot_functions():
         plot(outputs[i+1])
         ax.set_xticks([])
         ax.set_yticks([])
-        
+
     show()
 
 def test_whitening():
@@ -132,7 +133,7 @@ def test_whitening():
     data = np.random.randn(3, 1000000)*1000
     white_data = whiten(data)
     white_covariance = np.cov(white_data)
-    white_covariance = np.diag(np.diag(white_covariance)) 
+    white_covariance = np.diag(np.diag(white_covariance))
     ax = imshow(white_covariance, cmap='gray', interpolation='nearest')
     show()
 
@@ -151,18 +152,18 @@ def ICA(data, activation_function, learning_rate):
     diff = float('inf')
     #scatter data:
     plot_scatter(data, "Mixed data")
-    
+
     # whiten the data
     data = whiten(data)
 
     plot_scatter(data, "Whitened data")
-    
+
     # contribution of each data point
     N = 1./data.shape[1]
     it = 0 # current iteration
 
     print("Running activation function: " + str(activation_function))
-    #while difference > max_diff and it < 5000: 
+    #while difference > max_diff and it < 5000:
     while it < 5000 and diff > max_diff:
         # put data through a linear mapping
         linmap_data = np.dot(demixer, data)
@@ -185,7 +186,7 @@ def ICA(data, activation_function, learning_rate):
             print("iteration: " + str(it) + ", diff: " + str(diff))
 
     return np.dot(demixer, data)
-     
+
 def test_ICA():
     """ Tests the ICA method """
     # define parameters
@@ -202,7 +203,7 @@ def test_ICA():
 
     # plot results
     plot_signals(sources)
-    
+
 
     show()
 
@@ -225,18 +226,18 @@ def test_activations():
     # the activation functions to test
     act_funcs = [(lambda a: -tanh(a)), (lambda a: -a + tanh(a)), \
                  (lambda a: -a**3),(lambda a: - ( (6*a)/(a**2+5) ))]
-   
+
     # generate data (is the same for each test)
     data = generate_data()
     mixed_data = np.dot(random_nonsingular_matrix(data.shape[0]), data)
-   
+
     # perform ica with act func
     for act_func in act_funcs:
         source = ICA(mixed_data, act_func, learning_rate)
 
         plot_signals(source)
 
-    show() 
+    show()
 
 
 def demix_audio():
@@ -265,7 +266,7 @@ def demix_audio():
             assert(sample_rate == sr)
 
 
-        wav_data.append(data[:50000]) 
+        wav_data.append(data[:50000])
 
 
     # Create source and measurement data
@@ -274,15 +275,15 @@ def demix_audio():
     # perform ica with act func on mixed audio
     for act_func in act_funcs:
         demixed.append(ICA(S, act_func, learning_rate))
- 
+
     # save files away
     for i in range(len(demixed)):
         for j in range(demixed[i].shape[0]):
             save_wav(demixed[i][j], '../../demixed' + str(i) + str(j) + '.wav', sample_rate)
-                
+
 def plot_scatter(data,title):
     figure()
-    
+
     for i in range(0,len(data)):
         ax = subplot(data.shape[0], 1, i + 1)
         if i == 0:
@@ -291,15 +292,15 @@ def plot_scatter(data,title):
         scatter(x, data[i])
         ax.set_xticks([])
         ax.set_yticks([])
-        
-        
+
+
     draw()
-    
+
 def scatter_plots():
     """
     creates scatter plots as demanded by notebook
     """
-    # create data 
+    # create data
     big_data = generate_data()
 
     # get the desired datas
@@ -326,6 +327,16 @@ def show_correlation(data, title):
     # scatter
     scatter(data[0], data[1])
 
+def normalize_priors():
+    priors = [(lambda a: 1.0 / cosh(a)),
+              #(lambda a: exp(-a**2/2 + log(cosh(a)))), # wordt niet goed berekenend :S
+              (lambda a: exp(-a**4/4)),
+              (lambda a: (a**2 + 5)**-3)]
+    norms = [None for _ in priors]
+    for i, prior in enumerate(priors):
+        norms[i] = 1.0 / scipy.integrate.quad(prior, -np.inf, np.inf)[0]
+
+    print norms
 
 
 if __name__ == '__main__':
@@ -335,5 +346,7 @@ if __name__ == '__main__':
     #test_ICA()
     #test_activations()
     #demix_audio()
-    scatter_plots()
+    #scatter_plots()
+    #test_ICA()
+    normalize_priors()
 
