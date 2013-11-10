@@ -295,13 +295,42 @@ def plot_scatter(data,title):
         
     draw()
     
+def scatter_plots():
+    """
+    creates scatter plots as demanded by notebook
+    """
+    # create data 
+    big_data = generate_data()
+
+    # get the desired datas
+    data = big_data[0:2] # just 2 for plotting 2d
+    mixed_data = make_mixtures(data, random_nonsingular_matrix(2))
+    whitened_data = whiten(mixed_data)
+
+    # actually plot the data
+    show_correlation(data, "source")
+    show_correlation(mixed_data, "mixed")
+    show_correlation(whitened_data, "whitened")
+
+    plt.show()
+
+def show_correlation(data, title):
+    """
+    Plots two sources such that the correlation is shown
+    """
+    figure()
+
+    scatter(data[0], data[1])
+    set_title(title)
+
 
 
 if __name__ == '__main__':
     #test_whitening()
     #test_power()
     #plot_functions()
-    test_ICA()
+    #test_ICA()
     #test_activations()
     #demix_audio()
+    test_scatter()
 
