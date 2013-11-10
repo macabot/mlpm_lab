@@ -76,7 +76,7 @@ def whiten(data):
     """
 
     # get cov of zero mean data
-    mean = np.mean(data)
+    mean = np.mean(data, axis=1)[np.newaxis,:].T
     data -= mean
     covariance = np.cov(data)
 
