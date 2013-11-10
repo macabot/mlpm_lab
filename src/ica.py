@@ -194,6 +194,7 @@ def test_ICA():
 
     # create data
     data = generate_data()
+    plot_scatter(sources,"Sources")
     mixed_data = np.dot(random_nonsingular_matrix(data.shape[0]), data)
 
     # perform ica
@@ -201,7 +202,7 @@ def test_ICA():
 
     # plot results
     plot_signals(sources)
-    plot_scatter(sources,"Demixed data")
+    
 
     show()
 
