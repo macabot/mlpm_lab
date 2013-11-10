@@ -263,10 +263,13 @@ def demix_audio():
     for act_func in act_funcs:
         demixed.append(ICA(S, act_func, learning_rate))
  
+    return demixed
+    """
     # save files away
     for i in range(demixed.shape[0]):
         for j in range(demixed.shape[1]):
             save_wav('../../' + demixed[i, :], 'demixed' + str(i) + str(j) + '.wav', sample_rate)
+    """
                 
           
 
