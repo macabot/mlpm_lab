@@ -181,7 +181,7 @@ def ICA(data, activation_function, learning_rate):
 
         it += 1
 
-        if it % 30 == 0:
+        if it % 200 == 0:
             print("iteration: " + str(it) + ", diff: " + str(diff))
 
     return np.dot(demixer, data)
@@ -282,7 +282,6 @@ def demix_audio():
                 
 def plot_scatter(data,title):
     figure()
-    print data
     
     for i in range(0,len(data)):
         ax = subplot(data.shape[0], 1, i + 1)
