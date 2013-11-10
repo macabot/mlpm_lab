@@ -134,15 +134,16 @@ def test_whitening():
 def ICA(data, activation_function, learning_rate):
     """
     Independent Component Analysis
-    TODO: add difference function and include in while loop
     """
 
     # holds the difference between the new weights and the old
     difference = float('inf')
     # defines the limit of difference between old and new weights
-    max_diff = 0.01 # not used atm
+    max_diff = 1e-10
     # holds our best guess of the correct weights for demixing
     demixer = random_nonsingular_matrix(data.shape[0])
+    # holds the difference in weights
+    diff = float('inf')
 
     # whiten the data
     data = whiten(data)
@@ -152,7 +153,7 @@ def ICA(data, activation_function, learning_rate):
     it = 0 # current iteration
 
     #while difference > max_diff and it < 5000: 
-    while it < 5000:
+    while it < 15000 and diff > max_diff:
         # put data through a linear mapping
         linmap_data = np.dot(demixer, data)
 
@@ -165,9 +166,9 @@ def ICA(data, activation_function, learning_rate):
         # adjust the weights
         demixer_diff = demixer + N * \
                        (np.dot(nonlinmap_data, data_prime.T))
-        difference = np.sum(np.absolute(demixer_diff))
+        diff = np.sum(np.absolute(demixer_diff))
         demixer += learning_rate * demixer_diff
-        
+
         it += 1
 
     return np.dot(demixer, data)
@@ -225,5 +226,6 @@ if __name__ == '__main__':
     #test_whitening()
     #test_power()
     #plot_functions()
+    #test_ICA()
     test_activations()
 
