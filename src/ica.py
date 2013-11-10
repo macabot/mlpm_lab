@@ -374,6 +374,6 @@ if __name__ == '__main__':
     #demix_audio()
     #scatter_plots()
     #test_ICA()
-    #normalize_priors()
+    normalize_priors()
     kurtosis()
 
