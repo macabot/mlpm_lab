@@ -312,16 +312,19 @@ def scatter_plots():
     show_correlation(mixed_data, "mixed")
     show_correlation(whitened_data, "whitened")
 
-    plt.show()
+    show()
 
 def show_correlation(data, title):
     """
     Plots two sources such that the correlation is shown
     """
+    # create figure and subplot for naming
     figure()
+    ax = subplot(1,1,1)
+    ax.set_title(title)
 
+    # scatter
     scatter(data[0], data[1])
-    set_title(title)
 
 
 
@@ -332,5 +335,5 @@ if __name__ == '__main__':
     #test_ICA()
     #test_activations()
     #demix_audio()
-    test_scatter()
+    scatter_plots()
 
