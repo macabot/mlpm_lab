@@ -145,7 +145,10 @@ def ICA(data, activation_function, learning_rate):
     difference = float('inf')
     # defines the limit of difference between old and new weights
     max_diff = 1e-3
-    
+    # holds our best guess of the correct weights for demixing
+    demixer = random_nonsingular_matrix(data.shape[0])
+    # holds the difference in weights
+    diff = float('inf')
     #scatter data:
     plot_scatter(data, "Mixed data")
     
