@@ -1,6 +1,10 @@
 from numpy import *
 from matplotlib.pyplot import *
+import scipy.io.wavfile
 
+def save_wav(data, out_file, rate):
+    scaled = np.int16(data / np.max(np.abs(data)) * 32767)
+    scipy.io.wavfile.write(out_file, rate, scaled)          
 
 def sawtooth(x, period=0.2, amp=1.0, phase=0.):
     return (((x / period - phase - 0.5) % 1) - 0.5) * 2 * amp
@@ -139,7 +143,7 @@ def ICA(data, activation_function, learning_rate):
     # holds the difference between the new weights and the old
     difference = float('inf')
     # defines the limit of difference between old and new weights
-    max_diff = 1e-10
+    max_diff = 1e-3
     # holds our best guess of the correct weights for demixing
     demixer = random_nonsingular_matrix(data.shape[0])
     # holds the difference in weights
@@ -152,6 +156,7 @@ def ICA(data, activation_function, learning_rate):
     N = 1./data.shape[1]
     it = 0 # current iteration
 
+    print("Running activation function: " + str(activation_function))
     #while difference > max_diff and it < 5000: 
     while it < 15000 and diff > max_diff:
         # put data through a linear mapping
@@ -170,6 +175,9 @@ def ICA(data, activation_function, learning_rate):
         demixer += learning_rate * demixer_diff
 
         it += 1
+
+        if it % 30 == 0:
+            print("iteration: " + str(it) + ", diff: " + str(diff))
 
     return np.dot(demixer, data)
      
@@ -207,7 +215,8 @@ def test_activations():
     learning_rate = 0.1
 
     # the activation functions to test
-    act_funcs = [(lambda a: -tanh(a)), (lambda a: -a + tanh(a)),(lambda a: -a**3),(lambda a: - ( (6*a)/(a**2+5) ))]
+    act_funcs = [(lambda a: -tanh(a)), (lambda a: -a + tanh(a)), \
+                 (lambda a: -a**3),(lambda a: - ( (6*a)/(a**2+5) ))]
    
     # generate data (is the same for each test)
     data = generate_data()
@@ -221,11 +230,51 @@ def test_activations():
 
     show() 
 
+def demix_audio():
+    """
+    The audio demixing assignment in notebook
+    todo: something goes wrong with reading in files, as whitening produces shit
+    """
+
+    # learning rate used by ICA
+    learning_rate = 0.1
+    # the activation functions to test
+    act_funcs = [(lambda a: -tanh(a)), (lambda a: -a + tanh(a)), \
+                (lambda a: -a**3),(lambda a: - ( (6*a)/(a**2+5) ))]
+    # holds the eventual demixed audio files
+    demixed = []
+
+    # Load audio sources
+    source_files = ['X0.wav', 'X1.wav', 'X2.wav', 'X3.wav', 'X4.wav']
+    wav_data = []
+    sample_rate = None
+    for f in source_files:
+        sr, data = scipy.io.wavfile.read('../../' + f)
+        if sample_rate is None:
+            sample_rate = sr
+        else:
+            assert(sample_rate == sr)
+        wav_data.append(data[:190000]) 
+
+    # Create source and measurement data
+    S = np.c_[wav_data]
+
+    # perform ica with act func on mixed audio
+    for act_func in act_funcs:
+        demixed.append(ICA(S, act_func, learning_rate))
+ 
+    # save files away
+    for i in range(demixed.shape[0]):
+        for j in range(demixed.shape[1]):
+            save_wav('../../' + demixed[i, :], 'demixed' + str(i) + str(j) + '.wav', sample_rate)
+                
+          
 
 if __name__ == '__main__':
     #test_whitening()
     #test_power()
     #plot_functions()
     #test_ICA()
-    test_activations()
+    #test_activations()
+    demix_audio()
 
