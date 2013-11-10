@@ -152,7 +152,7 @@ def ICA(data, activation_function, learning_rate):
     it = 0 # current iteration
 
     #while difference > max_diff and it < 5000: 
-    while it < 200:
+    while it < 5000:
         # put data through a linear mapping
         linmap_data = np.dot(demixer, data)
 
@@ -183,10 +183,10 @@ def test_ICA():
     mixed_data = np.dot(random_nonsingular_matrix(data.shape[0]), data)
 
     # perform ica
-    a = ICA(mixed_data, activation_function, learning_rate)
+    sources = ICA(mixed_data, activation_function, learning_rate)
 
     # plot results
-    plot_signals(a)
+    plot_signals(sources)
     show()
 
 def test_power():
@@ -197,9 +197,33 @@ def test_power():
     m = np.array([[1,2], [3,4]])
     print m**-0.5
 
+def test_activations():
+    """
+    An exercise of the notebook, check the performance of each activation function
+    """
+
+    # parameter constants
+    learning_rate = 0.1
+
+    # the activation functions to test
+    act_funcs = [(lambda a: -tanh(a)), (lambda a: -a + tanh(a)),(lambda a: -a**3),(lambda a: - ( (6*a)/(a**2+5) ))]
+   
+    # generate data (is the same for each test)
+    data = generate_data()
+    mixed_data = np.dot(random_nonsingular_matrix(data.shape[0]), data)
+   
+    # perform ica with act func
+    for act_func in act_funcs:
+        source = ICA(mixed_data, act_func, learning_rate)
+
+        plot_signals(source)
+
+    show() 
+
+
 if __name__ == '__main__':
-    test_ICA()
     #test_whitening()
     #test_power()
     #plot_functions()
+    test_activations()
 
