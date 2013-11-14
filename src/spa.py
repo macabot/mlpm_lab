@@ -136,8 +136,11 @@ class Factor(Node):
         # TODO: implement Factor -> Variable message for max-sum
         pass
 
-def sum_product():
+def instantiate1():
+    """
+    First assignment of notebook, instantiate the network provided
+    """
     pass
-    
+
 if __name__ == '__main__':
-    sum_product
+    instantiate1()
