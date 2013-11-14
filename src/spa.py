@@ -7,7 +7,7 @@ class Node(object):
     def __init__(self, name):
         # A name for this Node, for printing purposes
         self.name = name
-        
+         
         # Neighbours in the graph, identified with their index in this list.
         # i.e. self.neighbours contains neighbour 0 through len(self.neighbours) - 1.
         self.neighbours = []
@@ -132,7 +132,12 @@ class Factor(Node):
         
     def send_sp_msg(self, other):
         # TODO: implement Factor -> Variable message for sum-product
-        pass
+
+        # check if all required information is available
+
+        # compute msg
+
+        # send msg
    
     def send_ms_msg(self, other):
         # TODO: implement Factor -> Variable message for max-sum
