@@ -1,3 +1,5 @@
+import numpy as np
+
 class Node(object):
     """
     Base-class for Nodes in a factor graph. Only instantiate sub-classes of Node.
@@ -140,7 +142,32 @@ def instantiate1():
     """
     First assignment of notebook, instantiate the network provided
     """
-    pass
+
+    # holds the nodes in graph
+    nodes = []
+
+    # append the nodes 
+    nodes.append(Variable('Influenza', 2))
+    nodes.append(Variable('SoreThroat', 2))
+    nodes.append(Variable('Fever', 2))
+    nodes.append(Variable('Bronchitis', 2))
+    nodes.append(Variable('Smokes', 2))
+    nodes.append(Variable('Wheezing', 2))
+    nodes.append(Variable('Coughing', 2))
+
+    # append factors
+
+    return nodes
+
+###### Debugging functions ######
+def print_graph(graph):
+    """
+    Print each nodes in the graph
+    """
+
+    for node in graph:
+        print node
 
 if __name__ == '__main__':
-    instantiate1()
+    graph = instantiate1()
+    print_graph(graph)
