@@ -144,18 +144,27 @@ def instantiate1():
     """
 
     # holds the nodes in graph
-    nodes = []
+    nodes = dict()
 
     # append the nodes 
-    nodes.append(Variable('Influenza', 2))
-    nodes.append(Variable('SoreThroat', 2))
-    nodes.append(Variable('Fever', 2))
-    nodes.append(Variable('Bronchitis', 2))
-    nodes.append(Variable('Smokes', 2))
-    nodes.append(Variable('Wheezing', 2))
-    nodes.append(Variable('Coughing', 2))
+    varNames = ['Influenza', 'SoreThroat', 'Fever', 'Bronchitis', \
+        'Smokes', 'Wheezing', 'Coughing']
+    for varName in varNames:
+      nodes[varName] = Variable(varName, 2)
 
     # append factors
+
+    nodes['priorIN'] = Factor('priorIN', np.array([0.95, 0.05]), [nodes['Influenza']])
+    nodes['priorSM'] = Factor('priorSM', np.array([0.8, 0.2]), [nodes['Smokes']])
+
+    nodes['ST-IN'] = Factor('ST-IN', np.array([[0.009, 0.7], [0.001, 0.3]]), [nodes['SoreThroat'], nodes['Influenza']])
+    nodes['FE-FL'] = Factor('FE-FL', np.array([[0.95, 0.1], [0.05, 0.9]]), [nodes['Fever'], nodes['Influenza']])
+    nodes['CO-BR'] = Factor('CO-BR', np.array([[0.03, 0.2], [0.07, 0.8]]), [nodes['Coughing'], nodes['Bronchitis']])
+    nodes['WH-BR'] = Factor('WH-BR', np.array([[0.009, 0.4], [0.001, 0.6]]), [nodes['Wheezing'], nodes['Bronchitis']])
+
+
+    nodes['BR-IN-SM'] = Factor('BR-IN-SM', np.array([[[0.0009, 0.3], [0.9, 0.99]], [[0.0001, 0.7], [0.1, 0.01]]]), [nodes['Bronchitis'], nodes['Influenza'], nodes['Smokes']])
+
 
     return nodes
 
@@ -165,8 +174,9 @@ def print_graph(graph):
     Print each nodes in the graph
     """
 
-    for node in graph:
-        print node
+    for node in graph.values():
+        print("%s with %d neighbours and of type %s" % \
+            (str(node).ljust(20), len(node.neighbours), str(type(node))))
 
 if __name__ == '__main__':
     graph = instantiate1()
