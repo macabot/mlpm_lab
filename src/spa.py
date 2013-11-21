@@ -136,8 +136,18 @@ class Factor(Node):
         # check if all required information is available
 
         # compute msg
+        messages = [np.array(message) for message in self.in_msgs.itervalues()]
+        
+        # todo: make them same order as factor (thus same order as neighbours)
+        messages = np.multiply.reduce(np.ix_(*messages))
+
+        # fix this
+        factorDims = range(self.f.ndim)
+        msg = np.tensordot(messages, self.f, range(messages.ndim), range(self.f.ndim))
+        # end fix
 
         # send msg
+        other.receive_msg(self, msg)
    
     def send_ms_msg(self, other):
         # TODO: implement Factor -> Variable message for max-sum
@@ -162,14 +172,13 @@ def instantiate1():
     nodes['priorIN'] = Factor('priorIN', np.array([0.95, 0.05]), [nodes['Influenza']])
     nodes['priorSM'] = Factor('priorSM', np.array([0.8, 0.2]), [nodes['Smokes']])
 
-    nodes['ST-IN'] = Factor('ST-IN', np.array([[0.009, 0.7], [0.001, 0.3]]), [nodes['SoreThroat'], nodes['Influenza']])
+    nodes['ST-IN'] = Factor('ST-IN', np.array([[0.999, 0.7], [0.001, 0.3]]), [nodes['SoreThroat'], nodes['Influenza']])
     nodes['FE-FL'] = Factor('FE-FL', np.array([[0.95, 0.1], [0.05, 0.9]]), [nodes['Fever'], nodes['Influenza']])
-    nodes['CO-BR'] = Factor('CO-BR', np.array([[0.03, 0.2], [0.07, 0.8]]), [nodes['Coughing'], nodes['Bronchitis']])
-    nodes['WH-BR'] = Factor('WH-BR', np.array([[0.009, 0.4], [0.001, 0.6]]), [nodes['Wheezing'], nodes['Bronchitis']])
+    nodes['CO-BR'] = Factor('CO-BR', np.array([[0.93, 0.2], [0.07, 0.8]]), [nodes['Coughing'], nodes['Bronchitis']])
+    nodes['WH-BR'] = Factor('WH-BR', np.array([[0.999, 0.4], [0.001, 0.6]]), [nodes['Wheezing'], nodes['Bronchitis']])
 
 
-    nodes['BR-IN-SM'] = Factor('BR-IN-SM', np.array([[[0.0009, 0.3], [0.9, 0.99]], [[0.0001, 0.7], [0.1, 0.01]]]), [nodes['Bronchitis'], nodes['Influenza'], nodes['Smokes']])
-
+    nodes['BR-IN-SM'] = Factor('BR-IN-SM', np.array([[[0.9999, 0.3], [0.1, 0.01]], [[0.0001, 0.7], [0.9, 0.99]]]), [nodes['Bronchitis'], nodes['Influenza'], nodes['Smokes']])
 
     return nodes
 
