@@ -95,12 +95,30 @@ class Variable(Node):
             Z: an optional normalization constant can be passed in. If None is passed, Z is computed.
         Returns: Z. Either equal to the input Z, or computed (if Z=None was passed).
         """
-        # TODO: compute marginal
-        return None, None
+        if Z == None:
+           Z = 1
+           
+       # multiply the in msgs with eachother
+       marginals = np.ones(self.in_msgs[0].shape)
+       for msg in self.in_msgs.values():
+           marginals *= msg
+       
+
+       return marginals, Z
 
     def send_sp_msg(self, other):
-        # TODO: implement Variable -> Factor message for sum-product
-        pass
+       # TODO: check if all necessary msgs are present
+
+       
+       # multiply the incoming msgs with eachother
+       messages = [self.in_msgs[node] for node in self.neighbours if node != other]
+
+       out_msg = messages[0].copy()
+       for msg in messages[1:]:
+           out_msg *= msg
+       
+       # send msg
+       other.receive_msg(self, out_msg)
 
     def send_ms_msg(self, other):
         # TODO: implement Variable -> Factor message for max-sum
@@ -138,7 +156,7 @@ class Factor(Node):
         # compute msg
         messages = [self.in_msgs[node] for node in self.neighbours if node != other]
         messages_prod = np.multiply.reduce(np.ix_(*messages))
-
+        
         factor_dims = range(self.f.ndim)
         factor_dims.pop(self.neighbours.index(other))
         msg = np.tensordot(messages_prod, self.f, (range(messages_prod.ndim), factor_dims))
@@ -149,6 +167,12 @@ class Factor(Node):
     def send_ms_msg(self, other):
         # TODO: implement Factor -> Variable message for max-sum
         pass
+        
+    def __repr__(self):
+        return '%s:\n%s' % (self.name, self.f)
+        
+    def __str__(self):
+        return self.__repr__()
 
 def instantiate1():
     """
@@ -176,19 +200,38 @@ def instantiate1():
 
 
     nodes['BR-IN-SM'] = Factor('BR-IN-SM', np.array([[[0.9999, 0.3], [0.1, 0.01]], [[0.0001, 0.7], [0.9, 0.99]]]), [nodes['Bronchitis'], nodes['Influenza'], nodes['Smokes']])
+    
 
     return nodes
 
 def test_factor_to_variable():
     graph = instantiate1()
     factor = graph['BR-IN-SM']
+    print factor
     messages = [np.array([1, 2]), np.array([3, 4]), np.array([5, 6])]
     for i, message in enumerate(messages):
         factor.in_msgs[factor.neighbours[i]] = message
 
-    for node in factor.neighbours:
-        factor.send_sp_msg(node)
-        print node.in_msgs[factor]
+    for other in reversed(factor.neighbours):
+        print 'mes towards %s' % other.name
+        factor.send_sp_msg(other)
+        print other.in_msgs[factor]
+        break
+        
+def test_node_to_factor():
+   graph = instantiate1()
+   node = graph['Influenza']
+
+   # set msgs in random order
+   node.in_msgs[graph['FE-FL']] = np.array([1,2])
+   node.in_msgs[graph['BR-IN-SM']] = np.array([3,4])
+   node.in_msgs[graph['priorIN']] = np.array([5,6])
+   node.in_msgs[graph['ST-IN']] = np.array([7,8])
+   
+   # send msgs
+   for factor in node.neighbours:
+       node.send_sp_msg(factor)
+       print str(factor.name) + ' ' + str(factor.in_msgs[node])
 
 ###### Debugging functions ######
 def print_graph(graph):
@@ -204,3 +247,4 @@ if __name__ == '__main__':
     #graph = instantiate1()
     #print_graph(graph)
     test_factor_to_variable()
+    test_node_to_factor()
