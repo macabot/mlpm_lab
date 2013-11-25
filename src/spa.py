@@ -119,6 +119,7 @@ class Variable(Node):
         return marginals, Z
 
     def send_sp_msg(self, other):
+        print 'send from %s to %s' % (self.name, other.name)
         # check if all necessary msgs are present
         if other in self.pending:
             self.pending.remove(other)
@@ -129,8 +130,8 @@ class Variable(Node):
         # multiply the incoming msgs with eachother
         messages = [self.in_msgs[node] for node in self.neighbours if node != other]
 
-        out_msg = messages[0].copy()
-        for msg in messages[1:]:
+        out_msg = np.ones(self.num_states)
+        for msg in messages:
            out_msg *= msg
 
         # send msg
@@ -165,6 +166,7 @@ class Factor(Node):
         self.f = f
 
     def send_sp_msg(self, other):
+        print 'send from %s to %s' % (self.name, other.name)
         # implement Factor -> Variable message for sum-product
         # check if all required information is available
         if other in self.pending:
@@ -194,6 +196,18 @@ class Factor(Node):
     def __str__(self):
         return self.__repr__()
 
+
+def sum_product(node_list):
+    for node in node_list:
+        if len(node.neighbours) == 1:
+            node.pending = set([node.neighbours[0]])
+        for neighbour in node.neighbours:
+            node.send_sp_msg(neighbour)
+           
+    for node in reversed(node_list):
+        for neighbour in node.neighbours:
+            node.send_sp_msg(neighbour)
+        
 def instantiate1():
     """
     First assignment of notebook, instantiate the network provided
@@ -223,6 +237,14 @@ def instantiate1():
 
 
     return nodes
+    
+def test_sum_product():
+    graph = instantiate1()
+    names = ['SoreThroat', 'ST-IN', 'Fever', 'FE-FL', 'priorIN', 'Influenza', 
+             'Coughing', 'CO-BR', 'Wheezing', 'WH-BR', 'priorSM', 'Smokes',
+             'BR-IN-SM', 'Bronchitis']
+    nodes = [graph[name] for name in names]
+    sum_product(nodes)
 
 def test_factor_to_variable():
     graph = instantiate1()
@@ -283,6 +305,7 @@ def print_graph(graph):
 if __name__ == '__main__':
     #graph = instantiate1()
     #print_graph(graph)
-    test_factor_to_variable()
-    test_variable_to_factor()
+    #test_factor_to_variable()
+    #test_variable_to_factor()
     #test_variable_marginal()
+    test_sum_product()
