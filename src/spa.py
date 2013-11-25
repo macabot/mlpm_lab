@@ -131,9 +131,9 @@ class Factor(Node):
         self.f = f
 
     def send_sp_msg(self, other):
-        # TODO: implement Factor -> Variable message for sum-product
+        # implement Factor -> Variable message for sum-product
 
-        # check if all required information is available
+        # TODO check if all required information is available
 
         # compute msg
         messages = [self.in_msgs[node] for node in self.neighbours if node != other]
@@ -141,7 +141,7 @@ class Factor(Node):
 
         factor_dims = range(self.f.ndim)
         factor_dims.pop(self.neighbours.index(other))
-        msg = np.tensordot(messages_prod, self.f, range(messages_prod.ndim), factor_dims)
+        msg = np.tensordot(messages_prod, self.f, (range(messages_prod.ndim), factor_dims))
 
         # send msg
         other.receive_msg(self, msg)
