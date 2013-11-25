@@ -39,8 +39,14 @@ class Node(object):
         # Store the incomming message, replacing previous messages from the same node
         self.in_msgs[other] = msg
 
-        # TODO: add pending messages
-        # self.pending.update(...)
+        # if as many msgs as neighbours, all other nodes have pending msgs
+        if count(self.neighbours) == count(in_msgs):
+            for node in self.neighbours if node != other:
+                self.pending.add(node)
+        # if 1 msg less than amount of neighbours only 1 neighbour has pending msg
+        elif count(self.neighbours) == count(in_msgs) - 1:
+            # find the neighbour
+            self.pending.add(set(self.neighbours) - set(in_msgs.keys()))
 
     def __str__(self):
         # This is printed when using 'print node_instance'
