@@ -92,17 +92,21 @@ class Variable(Node):
         Compute the marginal distribution of this Variable.
         It is assumed that message passing has completed when this function is called.
         Args:
-            Z: an optional normalization constant can be passed in. If None is passed, Z is computed.
+           Z: an optional normalization constant can be passed in. If None is passed, Z is computed.
         Returns: Z. Either equal to the input Z, or computed (if Z=None was passed).
         """
-        if Z == None:
-           Z = 1
-           
-        # multiply the in msgs with eachother
-        marginals = np.ones(self.in_msgs[0].shape)
+         
+        # multiply the in msgs with eachother in order to calculate probability
+        marginals = np.ones(self.in_msgs[self.neighbours[0]].shape)
         for msg in self.in_msgs.values():
-            marginals *= msg
-       
+           marginals *= msg
+
+        # calculate Z if not provided
+        if Z == None:
+          Z = np.sum(marginals)
+
+        # normalize
+        marginals /= Z
 
         return marginals, Z
 
@@ -232,6 +236,21 @@ def test_variable_to_factor():
     for factor in variable.neighbours:
         variable.send_sp_msg(factor)
         print str(factor.name) + ' ' + str(factor.in_msgs[variable])
+        
+def test_variable_marginal():
+   graph = instantiate1()
+   variable = graph['Influenza']
+
+   # set msgs in random order
+   variable.in_msgs[graph['FE-FL']] = np.array([1,2])
+   variable.in_msgs[graph['BR-IN-SM']] = np.array([3,4])
+   variable.in_msgs[graph['priorIN']] = np.array([5,6])
+   variable.in_msgs[graph['ST-IN']] = np.array([7,8])
+
+   # calculate marginal influenza
+   marginal, Z = variable.marginal(None)
+   print marginal
+   print Z
 
 ###### Debugging functions ######
 def print_graph(graph):
@@ -248,3 +267,4 @@ if __name__ == '__main__':
     #print_graph(graph)
     test_factor_to_variable()
     test_variable_to_factor()
+    test_variable_marginal()
