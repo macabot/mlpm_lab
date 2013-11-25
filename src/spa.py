@@ -98,13 +98,13 @@ class Variable(Node):
         if Z == None:
            Z = 1
            
-       # multiply the in msgs with eachother
-       marginals = np.ones(self.in_msgs[0].shape)
-       for msg in self.in_msgs.values():
-           marginals *= msg
+        # multiply the in msgs with eachother
+        marginals = np.ones(self.in_msgs[0].shape)
+        for msg in self.in_msgs.values():
+            marginals *= msg
        
 
-       return marginals, Z
+        return marginals, Z
 
     def send_sp_msg(self, other):
        # TODO: check if all necessary msgs are present
@@ -218,20 +218,20 @@ def test_factor_to_variable():
         print other.in_msgs[factor]
         break
         
-def test_node_to_factor():
-   graph = instantiate1()
-   node = graph['Influenza']
+def test_variable_to_factor():
+    graph = instantiate1()
+    variable = graph['Influenza']
 
-   # set msgs in random order
-   node.in_msgs[graph['FE-FL']] = np.array([1,2])
-   node.in_msgs[graph['BR-IN-SM']] = np.array([3,4])
-   node.in_msgs[graph['priorIN']] = np.array([5,6])
-   node.in_msgs[graph['ST-IN']] = np.array([7,8])
-   
-   # send msgs
-   for factor in node.neighbours:
-       node.send_sp_msg(factor)
-       print str(factor.name) + ' ' + str(factor.in_msgs[node])
+    # set msgs in random order
+    variable.in_msgs[graph['FE-FL']] = np.array([1,2])
+    variable.in_msgs[graph['BR-IN-SM']] = np.array([3,4])
+    variable.in_msgs[graph['priorIN']] = np.array([5,6])
+    variable.in_msgs[graph['ST-IN']] = np.array([7,8])
+
+    # send msgs
+    for factor in variable.neighbours:
+        variable.send_sp_msg(factor)
+        print str(factor.name) + ' ' + str(factor.in_msgs[variable])
 
 ###### Debugging functions ######
 def print_graph(graph):
@@ -247,4 +247,4 @@ if __name__ == '__main__':
     #graph = instantiate1()
     #print_graph(graph)
     test_factor_to_variable()
-    test_node_to_factor()
+    test_variable_to_factor()
