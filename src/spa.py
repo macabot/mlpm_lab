@@ -125,7 +125,6 @@ class Variable(Node):
             self.pending.remove(other)
         else:
             raise Exception('%s is not pending' % (other.name,))
-            return
 
         # multiply the incoming msgs with eachother
         messages = [self.in_msgs[node] for node in self.neighbours if node != other]
@@ -172,7 +171,6 @@ class Factor(Node):
             self.pending.remove(other)
         else:
             raise Exception('%s is not pending' % (other.name,))
-            return
 
         # compute msg
         messages = [self.in_msgs[node] for node in self.neighbours if node != other]
