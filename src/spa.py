@@ -106,7 +106,7 @@ class Variable(Node):
         """
 
         # multiply the in msgs with eachother in order to calculate probability
-        marginals = np.ones(self.in_msgs[self.neighbours[0]].shape)
+        marginals = self.observed_state
         for msg in self.in_msgs.values():
             marginals *= msg
 
@@ -129,7 +129,7 @@ class Variable(Node):
         # multiply the incoming msgs with eachother
         messages = [self.in_msgs[node] for node in self.neighbours if node != other]
 
-        out_msg = np.ones(self.num_states)
+        out_msg = self.observed_state
         for msg in messages:
             out_msg *= msg
 
