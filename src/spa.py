@@ -36,6 +36,7 @@ class Node(object):
         raise Exception('Method send_ms_msg not implemented in base-class Node')
 
     def receive_msg(self, other, msg):
+        print '%s -> %s receive_msg: %s' % (other.name, self.name, msg)
         # Store the incomming message, replacing previous messages from the same node
         self.in_msgs[other] = msg
 
@@ -46,9 +47,9 @@ class Node(object):
                     self.pending.add(node)
 
         # if 1 msg less than amount of neighbours only 1 neighbour has pending msg
-        elif len(self.neighbours) == len(self.in_msgs) - 1:
+        elif len(self.neighbours) == len(self.in_msgs) + 1:
             # find the neighbour
-            self.pending.add(set(self.neighbours) - set(self.in_msgs.keys()))
+            self.pending.add((set(self.neighbours) - set(self.in_msgs.keys())).pop())
 
     def __str__(self):
         # This is printed when using 'print node_instance'
@@ -119,12 +120,11 @@ class Variable(Node):
         return marginals, Z
 
     def send_sp_msg(self, other):
-        print 'send from %s to %s' % (self.name, other.name)
         # check if all necessary msgs are present
         if other in self.pending:
             self.pending.remove(other)
         else:
-            print 'other is not pending'
+            raise Exception('%s is not pending' % (other.name,))
             return
 
         # multiply the incoming msgs with eachother
@@ -166,13 +166,12 @@ class Factor(Node):
         self.f = f
 
     def send_sp_msg(self, other):
-        print 'send from %s to %s' % (self.name, other.name)
         # implement Factor -> Variable message for sum-product
         # check if all required information is available
         if other in self.pending:
             self.pending.remove(other)
         else:
-            print 'other is not pending'
+            raise Exception('%s is not pending' % (other.name,))
             return
 
         # compute msg
@@ -198,15 +197,18 @@ class Factor(Node):
 
 
 def sum_product(node_list):
+    # initialize pending messages on leave nodes
     for node in node_list:
         if len(node.neighbours) == 1:
             node.pending = set([node.neighbours[0]])
-        for neighbour in node.neighbours:
-            node.send_sp_msg(neighbour)
-           
-    for node in reversed(node_list):
-        for neighbour in node.neighbours:
-            node.send_sp_msg(neighbour)
+    # send messages to pending nodes
+    node_list.extend(reversed(node_list))
+    for node in node_list:
+        if len(node.pending) == 0:
+            print '%s has no pending nodes' % (node.name,)
+        while len(node.pending) != 0:
+            pending_node = iter(node.pending).next()
+            node.send_sp_msg(pending_node)
         
 def instantiate1():
     """
@@ -240,9 +242,9 @@ def instantiate1():
     
 def test_sum_product():
     graph = instantiate1()
-    names = ['SoreThroat', 'ST-IN', 'Fever', 'FE-FL', 'priorIN', 'Influenza', 
-             'Coughing', 'CO-BR', 'Wheezing', 'WH-BR', 'priorSM', 'Smokes',
-             'BR-IN-SM', 'Bronchitis']
+    names = ['SoreThroat', 'Fever', 'Coughing', 'Wheezing', 'priorIN', 
+             'priorSM', 'ST-IN', 'FE-FL', 'CO-BR', 'WH-BR', 'Influenza', 
+             'Smokes', 'Bronchitis', 'BR-IN-SM']
     nodes = [graph[name] for name in names]
     sum_product(nodes)
 
