@@ -108,11 +108,11 @@ class Variable(Node):
         # multiply the in msgs with eachother in order to calculate probability
         marginals = np.ones(self.in_msgs[self.neighbours[0]].shape)
         for msg in self.in_msgs.values():
-           marginals *= msg
+            marginals *= msg
 
         # calculate Z if not provided
         if Z == None:
-          Z = np.sum(marginals)
+            Z = np.sum(marginals)
 
         # normalize
         marginals /= Z
@@ -132,7 +132,7 @@ class Variable(Node):
 
         out_msg = np.ones(self.num_states)
         for msg in messages:
-           out_msg *= msg
+            out_msg *= msg
 
         # send msg
         other.receive_msg(self, out_msg)
@@ -209,7 +209,7 @@ def sum_product(node_list):
         while len(node.pending) != 0:
             pending_node = iter(node.pending).next()
             node.send_sp_msg(pending_node)
-        
+
 def instantiate1():
     """
     First assignment of notebook, instantiate the network provided
@@ -219,10 +219,10 @@ def instantiate1():
     nodes = dict()
 
     # append the nodes
-    varNames = ['Influenza', 'SoreThroat', 'Fever', 'Bronchitis', \
+    var_names = ['Influenza', 'SoreThroat', 'Fever', 'Bronchitis', \
         'Smokes', 'Wheezing', 'Coughing']
-    for varName in varNames:
-      nodes[varName] = Variable(varName, 2)
+    for var_name in var_names:
+        nodes[var_name] = Variable(var_name, 2)
 
     # append factors
 
@@ -239,11 +239,11 @@ def instantiate1():
 
 
     return nodes
-    
+
 def test_sum_product():
     graph = instantiate1()
-    names = ['SoreThroat', 'Fever', 'Coughing', 'Wheezing', 'priorIN', 
-             'priorSM', 'ST-IN', 'FE-FL', 'CO-BR', 'WH-BR', 'Influenza', 
+    names = ['SoreThroat', 'Fever', 'Coughing', 'Wheezing', 'priorIN',
+             'priorSM', 'ST-IN', 'FE-FL', 'CO-BR', 'WH-BR', 'Influenza',
              'Smokes', 'Bronchitis', 'BR-IN-SM']
     nodes = [graph[name] for name in names]
     sum_product(nodes)
@@ -269,10 +269,10 @@ def test_variable_to_factor():
     variable.pending = set(variable.neighbours)
 
     # set msgs in random order
-    variable.in_msgs[graph['FE-FL']] = np.array([1,2])
-    variable.in_msgs[graph['BR-IN-SM']] = np.array([3,4])
-    variable.in_msgs[graph['priorIN']] = np.array([5,6])
-    variable.in_msgs[graph['ST-IN']] = np.array([7,8])
+    variable.in_msgs[graph['FE-FL']] = np.array([1, 2])
+    variable.in_msgs[graph['BR-IN-SM']] = np.array([3, 4])
+    variable.in_msgs[graph['priorIN']] = np.array([5, 6])
+    variable.in_msgs[graph['ST-IN']] = np.array([7, 8])
 
     # send msgs
     for factor in variable.neighbours:
@@ -280,19 +280,19 @@ def test_variable_to_factor():
         print str(factor.name) + ' ' + str(factor.in_msgs[variable])
 
 def test_variable_marginal():
-   graph = instantiate1()
-   variable = graph['Influenza']
+    graph = instantiate1()
+    variable = graph['Influenza']
 
-   # set msgs in random order
-   variable.in_msgs[graph['FE-FL']] = np.array([1,2])
-   variable.in_msgs[graph['BR-IN-SM']] = np.array([3,4])
-   variable.in_msgs[graph['priorIN']] = np.array([5,6])
-   variable.in_msgs[graph['ST-IN']] = np.array([7,8])
+    # set msgs in random order
+    variable.in_msgs[graph['FE-FL']] = np.array([1, 2])
+    variable.in_msgs[graph['BR-IN-SM']] = np.array([3, 4])
+    variable.in_msgs[graph['priorIN']] = np.array([5, 6])
+    variable.in_msgs[graph['ST-IN']] = np.array([7, 8])
 
-   # calculate marginal influenza
-   marginal, Z = variable.marginal(None)
-   print marginal
-   print Z
+    # calculate marginal influenza
+    marginal, Z = variable.marginal(None)
+    print marginal
+    print Z
 
 ###### Debugging functions ######
 def print_graph(graph):
