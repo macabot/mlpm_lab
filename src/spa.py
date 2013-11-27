@@ -417,8 +417,6 @@ def test_loopy(path):
     for node in x_nodes:
         if isinstance(node, Variable):
             print(str(node).ljust(20) + ' its maximum state: ' + str(node.max_state()))
-    img_to_graph('dalmation2.png')
-
 
 def test_sum_product():
     graph = instantiate1()
