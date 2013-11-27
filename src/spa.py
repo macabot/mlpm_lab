@@ -353,11 +353,11 @@ def img_to_graph(path):
             X_Yfactor           = Factor('%s, %s'% (variableY.name,variableX.name), xy_factor , [variableY, variableX]) 
             factors.append(X_Yfactor)
             if i > 0:
-                X_Xleft_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,variableX.name), neighbour_factor , [x_nodes[i-1][j], variableX])
+                X_Xlup_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,variableX.name), neighbour_factor , [x_nodes[i-1][j], variableX])
                 factors.append(X_Xleft_factor)
                 
             if j > 0:
-                X_Xup_factor    = Factor('%s, %s'% (x_variable_row[j-1].name,variableX.name), neighbour_factor , [x_variable_row[j-1], variableX])
+                X_Xleft_factor    = Factor('%s, %s'% (x_variable_row[j-1].name,variableX.name), neighbour_factor , [x_variable_row[j-1], variableX])
                 factors.append(X_Xup_factor)
                 
             # append to lists
