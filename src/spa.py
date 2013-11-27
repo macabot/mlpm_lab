@@ -319,8 +319,8 @@ def instantiate1():
 
     nodes['Influenza'].set_observed(1)
     return nodes
-
-def img_to_graph(path):
+    
+def img_to_graph(path, fact_prob=[0.9,0.9,0.9]):
     """ Convert an img in path to a graph """
 
     # load img in BW
@@ -332,8 +332,9 @@ def img_to_graph(path):
     factors = []
 
     # the f-matrix of each factor is the same, so defined here
-    xy_factor = np.array([[0.5, 0.5],[0.5, 0.5]])
-    neighbour_factor = np.array([[0.9, 0.1],[ 0.1, 0.9]])
+    xy_factor = np.array([[fact_prob[0], fact_prob[0]-1], [fact_prob[0]-1, fact_prob[0]]])
+    neighbour_factor_x = np.array([[fact_prob[1], fact_prob[1]-1], [fact_prob[1]-1, fact_prob[1]]])
+    neighbour_factor_y = np.array([[fact_prob[2], fact_prob[2]-1], [fact_prob[2]-1, fact_prob[2]]])
 
     # for each row in image
     for i in range(im.shape[0]):
@@ -347,6 +348,7 @@ def img_to_graph(path):
             variableY = Variable("Y_%d_%d" %(i, j), 2)
             variableX = Variable("X_%d_%d" %(i, j), 2)
             # set node to observed
+            
             variableY.set_observed(int(im[i,j]))
             
             # set all factors
@@ -531,7 +533,7 @@ if __name__ == '__main__':
     #test_variable_marginal()
     #test_sum_product()
     #test_max_sum()
-    #img_to_graph('../../lab2/dalmatian1.png')
+    img_to_graph('../../lab2/dalmatian1.png')
     #img_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
-    test_loopy()
+    #test_loopy()
     #get_neighbour_factor('../../lab2/dalmatian1.png')
