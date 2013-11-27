@@ -325,7 +325,7 @@ def graph_to_img(xnodes, dims):
             else: 
                 new_img[i][j] = 0
     plt.gray()            
-    plt.imshow(new_img, interpolation='nearest')
+    plt.imshow(new_img)
     plt.show()
             
    
@@ -344,19 +344,19 @@ def im_to_graph(im, fact_prob=[0.9,0.9,0.9]):
     neighbour_factor_up = np.array([[fact_prob[2], fact_prob[2]-1], [fact_prob[2]-1, fact_prob[2]]])
 
     # for each row in image
-    for i in range(im.shape[0]):
+    for i in range(im.shape[1]):
 
         # holds nodes in this row to be appended to x_nodes
         x_variable_row = []
 
         # for each individual pixel
-        for j in range(im.shape[1]):
+        for j in range(im.shape[0]):
             # create nodes for each pixel (latent and observed)
             variableY = Variable("Y_%d_%d" %(i, j), 2)
             variableX = Variable("X_%d_%d" %(i, j), 2)
             # set node to observed
             
-            variableY.set_observed(int(im[i,j]))
+            variableY.set_observed(int(im[j,i]))
             
             # set all factors
             X_Yfactor           = Factor('%s, %s'% (variableY.name,variableX.name), xy_factor , [variableY, variableX]) 
@@ -547,7 +547,16 @@ def test_graph_to_img(path):
 
     (_, y_nodes, _) = im_to_graph(im, [0.9, 0.95, 0.97])
 
+    plt.figure()
+    plt.gray()
+    plt.imshow(im)
+    plt.figure()
     graph_to_img(y_nodes, im.shape)
+
+def test_img_type():
+    im = np.mean(imread('../../lab2/dalmation2.png'), axis=2) > 0.5
+
+    print(im)
 
 ###### Debugging functions ######
 def print_graph(graph):
@@ -582,4 +591,5 @@ if __name__ == '__main__':
     #test_loopy('../../lab2/dalmation2.png')
     #denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
 
+    #test_img_type()
     #pl.show()
