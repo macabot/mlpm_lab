@@ -319,8 +319,8 @@ def graph_to_img(xnodes, dims):
     new_img = np.zeros(dims)
     for i in range(dims[0]):
         for j in range(dims[1]):
-            print xnodes[dims[0]*i+j].max_state()
-            if xnodes[dims[0]*i+j].max_state() >= 1:
+            #print xnodes[dims[0]*i+j].max_state()
+            if xnodes[dims[1]*i+j].max_state() >= 1:
                 new_img[i][j] = 1
             else: 
                 new_img[i][j] = 0
@@ -577,6 +577,7 @@ if __name__ == '__main__':
     #im = np.mean(imread('../../lab2/dalmation2.png'), axis=2) > 0.5
     #im_to_graph(im, [0.9, 0.95, 0.97])
 
+    #test_graph_to_img('./dalmation2.png')
     test_graph_to_img('../../lab2/dalmation2.png')
     #test_loopy('../../lab2/dalmation2.png')
     #denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
