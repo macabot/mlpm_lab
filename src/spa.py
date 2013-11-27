@@ -313,7 +313,6 @@ def instantiate1():
 
     nodes['Influenza'].set_observed(1)
     return nodes
-<<<<<<< HEAD
 
 
 def graph_to_img(xnodes, dims):
@@ -384,14 +383,14 @@ def im_to_graph(im, fact_prob=[0.9,0.9,0.9]):
     print 'done'
     return (x_nodes, y_nodes, factors)
 
-def denoise_img(path, fact_probs=[0.9, 0.9, 0.9):
+def denoise_img(path, fact_probs=[0.9, 0.9, 0.9]):
     """ Denoises and images given the fact_probs and the path to the image """
 
-    max_iterations = 5000
+    max_iterations = 1
 
     # create noisy graph
     im = np.mean(imread(path), axis=2) > 0.5
-    noise = np.random.rand(*im.shape[0]) > 0.9
+    noise = np.random.rand(*im.shape) > 0.9
     noise_im = np.logical_xor(noise, im)
 
     # create graph
@@ -401,7 +400,7 @@ def denoise_img(path, fact_probs=[0.9, 0.9, 0.9):
     loopy_max_sum(x_nodes, y_nodes, factors, max_iterations)
 
     # show denoise
-    graph_to_im(x_nodes)
+    graph_to_img(x_nodes,im.shape)
     
 def get_neighbour_factor(path):
     """ get the correct chances in the factor of an image by counting """
@@ -574,4 +573,3 @@ if __name__ == '__main__':
     #test_loopy('../../lab2/dalmation2.png')
     denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
 
-    pl.show()
