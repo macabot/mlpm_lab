@@ -301,8 +301,14 @@ def img_to_graph(path):
     y_nodes = []
     factors = []
 
+    # the f-matrix of each factor is the same, so defined here
+    xy_factor = 
+    neighbour_factor =
+
     # for each row in image
     for i in range(im.shape[0]):
+        
+        # holds nodes in this row to be appended to x_nodes
         x_node_row = []
 
         # for each individual pixel
@@ -318,10 +324,10 @@ def img_to_graph(path):
             X_Yfactor           = Factor('%s, %s'% (nodeY.name,nodeX.name), xy_factor , [nodeY, nodeX]) 
             
             if i > 0:
-                X_Xleft_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,nodeX.name), neighbor_factor , [x_nodes[i-1][j], nodeX])
+                X_Xleft_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,nodeX.name), neighbour_factor , [x_nodes[i-1][j], nodeX])
                 
             if j > 0:
-                X_Xup_factor    = Factor('%s, %s'% (x_nodes[i][j-1].name,nodeX.name), neighbor_factor , [x_nodes[i][j-1], nodeX])
+                X_Xup_factor    = Factor('%s, %s'% (x_nodes[i][j-1].name,nodeX.name), neighbour_factor , [x_nodes[i][j-1], nodeX])
                 
             # append to lists
             x_node_row.append(nodeX)
