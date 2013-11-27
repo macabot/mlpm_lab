@@ -374,7 +374,7 @@ def get_neighbour_factor(path):
 
     # load img in BW
     im = np.mean(imread(path), axis=2) > 0.5
-
+    
     # initialize
     x_diff = 0
     y_diff = 0
@@ -387,8 +387,12 @@ def get_neighbour_factor(path):
             x_diff += abs(int(im[i-1,j]) - int(im[i,j]))
             y_diff += abs(int(im[i,j-1]) - int(im[i,j]))
 
-    x_diff = x_diff / im.shape[0]
-    y_diff = y_diff / im.shape[1]
+    # divide by amount of elements with neighbours 
+    amount_elements_x = (len(im)-1) * len(im[0])
+    amount_elements_y = len(im) * (len(im[0])-1)
+
+    x_diff = x_diff / float(amount_elements_x)
+    y_diff = y_diff / float(amount_elements_y)
 
     print (x_diff, y_diff)
 
@@ -397,6 +401,7 @@ def test_loopy():
     nodes = graph.values()
     loopy_max_sum(nodes, len(nodes)*3) 
     
+
 def test_sum_product():
     graph = instantiate1()
     names = ['SoreThroat', 'Fever', 'Coughing', 'Wheezing', 'priorIN',
