@@ -337,9 +337,9 @@ def im_to_graph(im, fact_prob=[0.9,0.9,0.9]):
     factors = []
 
     # the f-matrix of each factor is the same, so defined here
-    xy_factor = np.array([[fact_prob[0], fact_prob[0]-1], [fact_prob[0]-1, fact_prob[0]]])
-    neighbour_factor_left = np.array([[fact_prob[1], fact_prob[1]-1], [fact_prob[1]-1, fact_prob[1]]])
-    neighbour_factor_up = np.array([[fact_prob[2], fact_prob[2]-1], [fact_prob[2]-1, fact_prob[2]]])
+    xy_factor = np.array([[fact_prob[0], 1-fact_prob[0]], [1-fact_prob[0], fact_prob[0]]])
+    neighbour_factor_left = np.array([[fact_prob[1], 1-fact_prob[1]], [1-fact_prob[1], fact_prob[1]]])
+    neighbour_factor_up = np.array([[fact_prob[2], 1-fact_prob[2]], [1-fact_prob[2], fact_prob[2]]])
 
     # for each row in image
     for i in range(im.shape[0]):
@@ -368,7 +368,6 @@ def im_to_graph(im, fact_prob=[0.9,0.9,0.9]):
                 factors.append(X_Xleft_factor)
                 
             # append to lists
-            
             x_variable_row.append(variableX)
             y_nodes.append(variableY)            
             
@@ -384,7 +383,7 @@ def im_to_graph(im, fact_prob=[0.9,0.9,0.9]):
 def denoise_img(path, fact_probs=[0.9, 0.9, 0.9]):
     """ Denoises and images given the fact_probs and the path to the image """
 
-    max_iterations = 1
+    max_iterations = 5
 
     # create noisy graph
     im = np.mean(imread(path), axis=2) > 0.5
