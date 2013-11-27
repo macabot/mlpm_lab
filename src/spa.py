@@ -344,9 +344,6 @@ def impath_to_graph(path, fact_prob=[0.9,0.9,0.9], denoise=False):
         noise = np.random.rand(*im.shape) > 0.9
         im = np.logical_xor(noise, im)
 
-    pl.figure()
-    pl.imshow(im)
-
     return im_to_graph(im, fact_prob)
 
     
