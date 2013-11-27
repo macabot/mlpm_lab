@@ -1,3 +1,4 @@
+from pylad import imread, gray
 import numpy as np
 
 class Node(object):
