@@ -333,8 +333,8 @@ def img_to_graph(path, fact_prob=[0.9,0.9,0.9]):
 
     # the f-matrix of each factor is the same, so defined here
     xy_factor = np.array([[fact_prob[0], fact_prob[0]-1], [fact_prob[0]-1, fact_prob[0]]])
-    neighbour_factor_x = np.array([[fact_prob[1], fact_prob[1]-1], [fact_prob[1]-1, fact_prob[1]]])
-    neighbour_factor_y = np.array([[fact_prob[2], fact_prob[2]-1], [fact_prob[2]-1, fact_prob[2]]])
+    neighbour_factor_left = np.array([[fact_prob[1], fact_prob[1]-1], [fact_prob[1]-1, fact_prob[1]]])
+    neighbour_factor_up = np.array([[fact_prob[2], fact_prob[2]-1], [fact_prob[2]-1, fact_prob[2]]])
 
     # for each row in image
     for i in range(im.shape[0]):
@@ -355,11 +355,11 @@ def img_to_graph(path, fact_prob=[0.9,0.9,0.9]):
             X_Yfactor           = Factor('%s, %s'% (variableY.name,variableX.name), xy_factor , [variableY, variableX]) 
             factors.append(X_Yfactor)
             if i > 0:
-                X_Xup_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,variableX.name), neighbour_factor , [x_nodes[i-1][j], variableX])
+                X_Xup_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,variableX.name), neighbour_factor_up , [x_nodes[i-1][j], variableX])
                 factors.append(X_Xup_factor)
                 
             if j > 0:
-                X_Xleft_factor    = Factor('%s, %s'% (x_variable_row[j-1].name,variableX.name), neighbour_factor , [x_variable_row[j-1], variableX])
+                X_Xleft_factor    = Factor('%s, %s'% (x_variable_row[j-1].name,variableX.name), neighbour_factor_left , [x_variable_row[j-1], variableX])
                 factors.append(X_Xleft_factor)
                 
             # append to lists
@@ -533,7 +533,7 @@ if __name__ == '__main__':
     #test_variable_marginal()
     #test_sum_product()
     #test_max_sum()
-    img_to_graph('../../lab2/dalmatian1.png')
+    img_to_graph('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
     #img_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
     #test_loopy()
     #get_neighbour_factor('../../lab2/dalmatian1.png')
