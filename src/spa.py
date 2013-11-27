@@ -316,16 +316,16 @@ def instantiate1():
 <<<<<<< HEAD
 
 
-def graph_to_img(xnodes):
-    new_img = np.zeros(xnodes.shape)
-    for i in range(xnodes.shape[0]):
-        for j in range(xnodes.shape[1]):
-            #print xnodes[i][j].max_state()
-            if xnodes[i][j].max_state() >= 1:
-                new_img[i][j] = True
+def graph_to_img(xnodes, dims):
+    new_img = np.zeros(dims)
+    for i in range(dims[0]):
+        for j in range(dims[1]):
+            print xnodes[dims[0]*i+j].max_state()
+            if xnodes[dims[0]*i+j].max_state() >= 1:
+                new_img[i][j] = 1
             else: 
-                new_img[i][j] = False
-                
+                new_img[i][j] = 0
+    plt.gray()            
     plt.imshow(new_img, interpolation='nearest')
     plt.show()
             
@@ -378,7 +378,7 @@ def im_to_graph(im, fact_prob=[0.9,0.9,0.9]):
             
         x_nodes.append(x_variable_row)
         
-    graph_to_img(np.array(x_nodes))
+    #graph_to_img(np.array(x_nodes))
     x_nodes = np.array(x_nodes).flatten()
     
     print 'done'
@@ -432,10 +432,14 @@ def get_neighbour_factor(path):
 
 def test_loopy(path):
     (x_nodes, y_nodes, factors) = img_to_graph(path)
-    loopy_max_sum(x_nodes, y_nodes, factors, 10)
+    loopy_max_sum(x_nodes, y_nodes, factors, 1)
     for node in x_nodes:
         if isinstance(node, Variable):
             print(str(node).ljust(20) + ' its maximum state: ' + str(node.max_state()))
+    output = img_to_graph('./dalmation2.png')
+    im = np.mean(imread('./dalmation2.png'), axis=2) > 0.5
+    graph_to_img(x_nodes, im.shape)
+
 
 def test_sum_product():
     graph = instantiate1()
