@@ -290,38 +290,48 @@ def instantiate1():
     nodes['Influenza'].set_observed(1)
     return nodes
     
-def img_to_graph():
-    im = np.mean(imread('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png'), axis=2) > 0.5
-    x_nodes = []
+def img_to_graph(path):
+    """ Convert an img in path to a graph """
+
+    # load img in BW
+    im = np.mean(imread(path), axis=2) > 0.5
+
+    # initialize nodes
+    x_nodes = [] # 2D for index simplicity
     y_nodes = []
     factors = []
+
+    # for each row in image
     for i in range(im.shape[0]):
         x_node_row = []
+
+        # for each individual pixel
         for j in range(im.shape[1]):
+            # create nodes for each pixel (latent and observed)
             nodeY = Variable("Y_%d_%d" %(i, j), 2)
             nodeX = Variable("X_%d_%d" %(i, j), 2)
-            if im[x,y] == True:
-                nodeY.set_observed(1)
-            else:
-                nodeY.set_observed(0)
-           
-            X_Yfactor           = Factor('%s, %s'% (nodeY.name,nodeX.name), neighbor_factor , [nodeY, nodeX])
+
+            # set node to observed
+            nodeY.set_observed(int(im[x,y]))
+
+            # set all factors
+            X_Yfactor           = Factor('%s, %s'% (nodeY.name,nodeX.name), xy_factor , [nodeY, nodeX]) 
             
-            if i < 0:
-                X_Xleft_factor  = Factor('%s, %s'% (x_nodes[i-1,j].name,nodeX.name), neighbor_factor , [x_nodes[i-1,j], nodeX])
+            if i > 0:
+                X_Xleft_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,nodeX.name), neighbor_factor , [x_nodes[i-1][j], nodeX])
                 
-            if j < 0:
-                X_Xup_factor    = Factor('%s, %s'% (x_nodes[i,j-1].name,nodeX.name), neighbor_factor , [x_nodes[i,j-1], nodeX])
+            if j > 0:
+                X_Xup_factor    = Factor('%s, %s'% (x_nodes[i][j-1].name,nodeX.name), neighbor_factor , [x_nodes[i][j-1], nodeX])
                 
+            # append to lists
             x_node_row.append(nodeX)
             y_nodes.append(nodeY)            
             factors.extend([X_Yfactor,X_Xleft_factor,X_Xup_factor])
             
         x_nodes.append(x_node_row)
-        
-    new_x_nodes = x_nodes.flatten()
-    
-    
+
+    x_nodes = x_nodes.flatten()
+    return (x_nodes, y_nodes, factors)
     
 def test_sum_product():
     graph = instantiate1()
@@ -444,4 +454,6 @@ if __name__ == '__main__':
     #test_variable_to_factor_ms()
     #test_variable_marginal()
     #test_sum_product()
-    test_max_sum()
+    #test_max_sum()
+    img_to_graph('../../lab2/dalmatian1.png')
+    #img_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
