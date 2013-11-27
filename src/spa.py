@@ -401,8 +401,9 @@ def get_neighbour_factor(path):
 
     print (x_diff, y_diff)
 
-def test_loopy():
-    graph = instantiate1()
+def test_loopy(path, fact_probs):
+    #graph = instantiate1()
+    graph = img_to_graph(path, fact_probs )
     nodes = graph.values()
     loopy_max_sum(nodes, len(nodes)*3)
     for node in nodes:
@@ -533,7 +534,7 @@ if __name__ == '__main__':
     #test_variable_marginal()
     #test_sum_product()
     #test_max_sum()
-    img_to_graph('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
+    #img_to_graph('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
     #img_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
-    #test_loopy()
     #get_neighbour_factor('../../lab2/dalmatian1.png')
+    test_loopy('../../lab2/dalmation2.png')
