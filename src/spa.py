@@ -106,7 +106,7 @@ class Variable(Node):
         """
 
         # multiply the in msgs with eachother in order to calculate probability
-        marginals = self.observed_state
+        marginals = self.observed_state.copy()
         marginals *= np.multiply.reduce(self.in_msgs.values())
 
         # calculate Z if not provided
@@ -117,6 +117,16 @@ class Variable(Node):
         marginals /= Z
 
         return marginals, Z
+
+    def max_state(self):
+        """ Return the most probable state, assumes max_sum algorithm has run """
+
+        # calculate max sum probability
+        max_state = np.log(self.observed_state)
+        max_state += np.add.reduce(self.in_msgs.values())
+
+        # return argmax: the maximal state
+        return np.argmax(max_state)
 
     def send_sp_msg(self, other):
         """Send message from Variable to Factor for sum-product algorithm"""
@@ -129,7 +139,7 @@ class Variable(Node):
         # multiply the incoming msgs with eachother
         messages = [self.in_msgs[node] for node in self.neighbours if node != other]
 
-        out_msg = self.observed_state
+        out_msg = self.observed_state.copy()
         out_msg *= np.multiply.reduce(messages)
 
         # send msg
@@ -277,7 +287,7 @@ def instantiate1():
 
     nodes['BR-IN-SM'] = Factor('BR-IN-SM', np.array([[[0.9999, 0.3], [0.1, 0.01]], [[0.0001, 0.7], [0.9, 0.99]]]), [nodes['Bronchitis'], nodes['Influenza'], nodes['Smokes']])
 
-
+    nodes['Influenza'].set_observed(1)
     return nodes
     
 def img_to_graph():
@@ -321,9 +331,9 @@ def test_sum_product():
     nodes = [graph[name] for name in names]
     sum_product(nodes)
 
-    for node in nodes:
+    for node in nodes[:len(nodes)/2]:
         if isinstance(node, Variable):
-            print(str(node).ljust(20) + ' has marginal: ' + str(node.marginal()))
+            print(str(node).ljust(15) +  ' has marginal: ' + str(node.marginal()))
 
 def test_max_sum():
     graph = instantiate1()
@@ -332,6 +342,11 @@ def test_max_sum():
              'Smokes', 'Bronchitis', 'BR-IN-SM']
     nodes = [graph[name] for name in names]
     max_sum(nodes)
+
+    for node in nodes[:len(nodes)/2]:
+        if isinstance(node, Variable):
+            print(str(node).ljust(20) + ' its maximum state: ' + str(node.max_state()))
+
 
 def test_factor_to_variable_sp():
     graph = instantiate1()
@@ -428,5 +443,5 @@ if __name__ == '__main__':
     #test_factor_to_variable_ms()
     #test_variable_to_factor_ms()
     #test_variable_marginal()
-    test_sum_product()
-    #test_max_sum()
+    #test_sum_product()
+    test_max_sum()
