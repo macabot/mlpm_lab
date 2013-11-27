@@ -542,12 +542,12 @@ def test_variable_marginal():
     print marginal
     print Z
 
-def test_graph_to_img():
+def test_graph_to_img(path):
     im = np.mean(imread(path), axis=2) > 0.5
 
     (_, y_nodes, _) = im_to_graph(im, [0.9, 0.95, 0.97])
 
-    graph_to_im(y_nodes)
+    graph_to_img(y_nodes, im.shape)
 
 ###### Debugging functions ######
 def print_graph(graph):
@@ -577,8 +577,8 @@ if __name__ == '__main__':
     #im = np.mean(imread('../../lab2/dalmation2.png'), axis=2) > 0.5
     #im_to_graph(im, [0.9, 0.95, 0.97])
 
-    #test_graph_to_img('../../lab2/dalmation2.png')
+    test_graph_to_img('../../lab2/dalmation2.png')
     #test_loopy('../../lab2/dalmation2.png')
-    denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
+    #denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
 
     #pl.show()
