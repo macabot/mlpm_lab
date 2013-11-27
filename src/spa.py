@@ -319,7 +319,7 @@ def instantiate1():
 
     nodes['Influenza'].set_observed(1)
     return nodes
-    
+
 def img_to_graph(path):
     """ Convert an img in path to a graph """
 
@@ -337,7 +337,7 @@ def img_to_graph(path):
 
     # for each row in image
     for i in range(im.shape[0]):
-        
+
         # holds nodes in this row to be appended to x_nodes
         x_node_row = []
 
@@ -351,43 +351,43 @@ def img_to_graph(path):
             nodeY.set_observed(int(im[x,y]))
 
             # set all factors
-            X_Yfactor           = Factor('%s, %s'% (nodeY.name,nodeX.name), xy_factor , [nodeY, nodeX]) 
-            
+            X_Yfactor           = Factor('%s, %s'% (nodeY.name,nodeX.name), xy_factor , [nodeY, nodeX])
+
             if i > 0:
                 X_Xleft_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,nodeX.name), neighbour_factor , [x_nodes[i-1][j], nodeX])
-                
+
             if j > 0:
                 X_Xup_factor    = Factor('%s, %s'% (x_nodes[i][j-1].name,nodeX.name), neighbour_factor , [x_nodes[i][j-1], nodeX])
-                
+
             # append to lists
             x_node_row.append(nodeX)
-            y_nodes.append(nodeY)            
+            y_nodes.append(nodeY)
             factors.extend([X_Yfactor,X_Xleft_factor,X_Xup_factor])
-            
+
         x_nodes.append(x_node_row)
 
     x_nodes = x_nodes.flatten()
     return (x_nodes, y_nodes, factors)
-    
+
 def get_neighbour_factor(path):
     """ get the correct chances in the factor of an image by counting """
 
     # load img in BW
     im = np.mean(imread(path), axis=2) > 0.5
-    
+
     # initialize
     x_diff = 0
     y_diff = 0
 
     # for each row in image starting with second
     for i in range(1, im.shape[0]):
-         
+
         # for each individual pixel column starting with second
         for j in range(1, im.shape[1]):
             x_diff += abs(int(im[i-1,j]) - int(im[i,j]))
             y_diff += abs(int(im[i,j-1]) - int(im[i,j]))
 
-    # divide by amount of elements with neighbours 
+    # divide by amount of elements with neighbours
     amount_elements_x = (len(im)-1) * len(im[0])
     amount_elements_y = len(im) * (len(im[0])-1)
 
@@ -399,8 +399,10 @@ def get_neighbour_factor(path):
 def test_loopy():
     graph = instantiate1()
     nodes = graph.values()
-    loopy_max_sum(nodes, len(nodes)*3) 
-    
+    loopy_max_sum(nodes, len(nodes)*3)
+    for node in nodes:
+        if isinstance(node, Variable):
+            print(str(node).ljust(20) + ' its maximum state: ' + str(node.max_state()))
 
 def test_sum_product():
     graph = instantiate1()
