@@ -292,7 +292,7 @@ def img_to_graph():
             nodeX = Variable("X_%d_%d" %(i, j), 2)
             if im[x,y] == True:
                 nodeY.set_observed(1)
-            else
+            else:
                 nodeY.set_observed(0)
            
             X_Yfactor           = Factor('%s, %s'% (nodeY.name,nodeX.name), neighbor_factor , [nodeY, nodeX])
@@ -320,6 +320,10 @@ def test_sum_product():
              'Smokes', 'Bronchitis', 'BR-IN-SM']
     nodes = [graph[name] for name in names]
     sum_product(nodes)
+
+    for node in nodes:
+        if isinstance(node, Variable):
+            print(str(node).ljust(20) + ' has marginal: ' + str(node.marginal()))
 
 def test_max_sum():
     graph = instantiate1()
@@ -424,5 +428,5 @@ if __name__ == '__main__':
     #test_factor_to_variable_ms()
     #test_variable_to_factor_ms()
     #test_variable_marginal()
-    #test_sum_product()
-    test_max_sum()
+    test_sum_product()
+    #test_max_sum()
