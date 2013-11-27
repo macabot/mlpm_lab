@@ -175,6 +175,7 @@ class Factor(Node):
             nb.add_neighbour(self)
 
         self.f = f
+        self.log_f = np.log(f)
 
     def send_sp_msg(self, other):
         """Send message from Factor to Variable for sum-product algorithm"""
@@ -209,8 +210,7 @@ class Factor(Node):
 
         factor_dims = range(self.f.ndim)
         factor_dims.pop(self.neighbours.index(other))
-        # TODO store log(f) as log_f in node
-        msg = np.amax(messages_add + np.log(self.f), tuple(factor_dims))
+        msg = np.amax(messages_add + self.log_f, tuple(factor_dims))
 
         # send msg
         other.receive_msg(self, msg)
@@ -287,7 +287,7 @@ def test_sum_product():
              'Smokes', 'Bronchitis', 'BR-IN-SM']
     nodes = [graph[name] for name in names]
     sum_product(nodes)
-    
+
 def test_max_sum():
     graph = instantiate1()
     names = ['SoreThroat', 'Fever', 'Coughing', 'Wheezing', 'priorIN',
