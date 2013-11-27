@@ -1,6 +1,7 @@
 from pylab import imread, gray
 import numpy as np
 import random
+<<<<<<< HEAD
 from matplotlib import pyplot as plt
 
 class Node(object):
@@ -328,11 +329,29 @@ def graph_to_img(xnodes):
     plt.imshow(new_img, interpolation='nearest')
     plt.show()
             
-def img_to_graph(path, fact_prob=[0.9,0.9,0.9]):
-    """ Convert an img in path to a graph """
+   
+def impath_to_graph(path, fact_prob=[0.9,0.9,0.9], denoise=False):
+    """ 
+    Convert the image in path to a graph, and add noise if third argument
+    tells it to
+    """
 
     # load img in BW
     im = np.mean(imread(path), axis=2) > 0.5
+
+    # denoise if necessary
+    if denoise:
+        noise = np.random.rand(*im.shape) > 0.9
+        im = np.logical_xor(noise, im)
+
+    pl.figure()
+    pl.imshow(im)
+
+    return im_to_graph(im, fact_prob)
+
+    
+def im_to_graph(im, fact_prob=[0.9,0.9,0.9]):
+    """ Convert an img in path to a graph """
 
     # initialize nodes
     x_nodes = [] # 2D for index simplicity
@@ -383,6 +402,17 @@ def img_to_graph(path, fact_prob=[0.9,0.9,0.9]):
     
     print 'done'
     return (x_nodes, y_nodes, factors)
+
+def denoise_img(path, fact_probs):
+    """ Denoises and images given the fact_probs and the path to the image """
+
+    # denoise
+
+    # create graph
+
+    # denoise
+
+    # show denoise
 
 def get_neighbour_factor(path):
     """ get the correct chances in the factor of an image by counting """
@@ -540,8 +570,10 @@ if __name__ == '__main__':
     #test_variable_marginal()
     #test_sum_product()
     #test_max_sum()
-    #img_to_graph('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
-    #img_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
-    test_loopy('./dalmation2.png')
+    impath_to_graph('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
+    impath_to_graph('../../lab2/dalmation2.png', [0.9, 0.95, 0.97], True)
+    #impath_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
     #get_neighbour_factor('../../lab2/dalmatian1.png')
     #test_loopy('../../lab2/dalmation2.png')
+    #denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
+    pl.show()
