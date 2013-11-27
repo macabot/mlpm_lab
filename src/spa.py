@@ -108,7 +108,7 @@ class Variable(Node):
         # multiply the in msgs with eachother in order to calculate probability
         marginals = self.observed_state
         marginals *= np.multiply.reduce(self.in_msgs.values())
-        
+
         # calculate Z if not provided
         if Z == None:
             Z = np.sum(marginals)
@@ -131,7 +131,7 @@ class Variable(Node):
 
         out_msg = self.observed_state
         out_msg *= np.multiply.reduce(messages)
-        
+
         # send msg
         other.receive_msg(self, out_msg)
 
@@ -197,7 +197,6 @@ class Factor(Node):
 
     def send_ms_msg(self, other):
         """Send message from Factor to Variable for max-sum algorithm"""
-        print '%s -> %s' % (self.name, other.name)
         # check if all required information is available
         if other in self.pending:
             self.pending.remove(other)
@@ -209,11 +208,8 @@ class Factor(Node):
         messages_add = np.add.reduce(np.ix_(*messages))
 
         factor_dims = range(self.f.ndim)
-        print 'factor_dims before %s' % (factor_dims,)
         factor_dims.pop(self.neighbours.index(other))
-        print 'factor_dims after %s' % (factor_dims,)
-        print messages_add
-        print self.f
+        # TODO store log(f) as log_f in node
         msg = np.amax(messages_add + np.log(self.f), tuple(factor_dims))
 
         # send msg
@@ -239,6 +235,20 @@ def sum_product(node_list):
         while len(node.pending) != 0:
             pending_node = iter(node.pending).next()
             node.send_sp_msg(pending_node)
+
+def max_sum(node_list):
+    # initialize pending messages on leave nodes
+    for node in node_list:
+        if len(node.neighbours) == 1:
+            node.pending = set([node.neighbours[0]])
+    # send messages to pending nodes
+    node_list.extend(reversed(node_list))
+    for node in node_list:
+        if len(node.pending) == 0:
+            print '%s has no pending nodes' % (node.name,)
+        while len(node.pending) != 0:
+            pending_node = iter(node.pending).next()
+            node.send_ms_msg(pending_node)
 
 def instantiate1():
     """
@@ -277,6 +287,14 @@ def test_sum_product():
              'Smokes', 'Bronchitis', 'BR-IN-SM']
     nodes = [graph[name] for name in names]
     sum_product(nodes)
+    
+def test_max_sum():
+    graph = instantiate1()
+    names = ['SoreThroat', 'Fever', 'Coughing', 'Wheezing', 'priorIN',
+             'priorSM', 'ST-IN', 'FE-FL', 'CO-BR', 'WH-BR', 'Influenza',
+             'Smokes', 'Bronchitis', 'BR-IN-SM']
+    nodes = [graph[name] for name in names]
+    max_sum(nodes)
 
 def test_factor_to_variable_sp():
     graph = instantiate1()
@@ -308,7 +326,7 @@ def test_variable_to_factor_sp():
     for factor in variable.neighbours:
         variable.send_sp_msg(factor)
         print str(factor.name) + ' ' + str(factor.in_msgs[variable])
-        
+
 def test_factor_to_variable_ms():
     graph = instantiate1()
     factor = graph['BR-IN-SM']
@@ -370,7 +388,8 @@ if __name__ == '__main__':
     #print_graph(graph)
     #test_factor_to_variable_sp()
     #test_variable_to_factor_sp()
-    test_factor_to_variable_ms()
-    test_variable_to_factor_ms()
+    #test_factor_to_variable_ms()
+    #test_variable_to_factor_ms()
     #test_variable_marginal()
     #test_sum_product()
+    test_max_sum()
