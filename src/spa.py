@@ -279,7 +279,40 @@ def instantiate1():
 
 
     return nodes
-
+    
+def img_to_graph():
+    im = np.mean(imread('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png'), axis=2) > 0.5
+    x_nodes = []
+    y_nodes = []
+    factors = []
+    for i in range(im.shape[0]):
+        x_node_row = []
+        for j in range(im.shape[1]):
+            nodeY = Variable("Y_%d_%d" %(i, j), 2)
+            nodeX = Variable("X_%d_%d" %(i, j), 2)
+            if im[x,y] == True:
+                nodeY.set_observed(1)
+            else
+                nodeY.set_observed(0)
+           
+            X_Yfactor           = Factor('%s, %s'% (nodeY.name,nodeX.name), neighbor_factor , [nodeY, nodeX])
+            
+            if i < 0:
+                X_Xleft_factor  = Factor('%s, %s'% (x_nodes[i-1,j].name,nodeX.name), neighbor_factor , [x_nodes[i-1,j], nodeX])
+                
+            if j < 0:
+                X_Xup_factor    = Factor('%s, %s'% (x_nodes[i,j-1].name,nodeX.name), neighbor_factor , [x_nodes[i,j-1], nodeX])
+                
+            x_node_row.append(nodeX)
+            y_nodes.append(nodeY)            
+            factors.extend([X_Yfactor,X_Xleft_factor,X_Xup_factor])
+            
+        x_nodes.append(x_node_row)
+        
+    new_x_nodes = x_nodes.flatten()
+    
+    
+    
 def test_sum_product():
     graph = instantiate1()
     names = ['SoreThroat', 'Fever', 'Coughing', 'Wheezing', 'priorIN',
