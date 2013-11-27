@@ -332,41 +332,44 @@ def img_to_graph(path):
     factors = []
 
     # the f-matrix of each factor is the same, so defined here
-    xy_factor = 0
-    neighbour_factor = 0
+    xy_factor = np.array([[0.5, 0.5],[0.5, 0.5]])
+    neighbour_factor = np.array([[0.9, 0.1],[ 0.1, 0.9]])
 
     # for each row in image
     for i in range(im.shape[0]):
 
         # holds nodes in this row to be appended to x_nodes
-        x_node_row = []
+        x_variable_row = []
 
         # for each individual pixel
         for j in range(im.shape[1]):
             # create nodes for each pixel (latent and observed)
-            nodeY = Variable("Y_%d_%d" %(i, j), 2)
-            nodeX = Variable("X_%d_%d" %(i, j), 2)
-
+            variableY = Variable("Y_%d_%d" %(i, j), 2)
+            variableX = Variable("X_%d_%d" %(i, j), 2)
             # set node to observed
-            nodeY.set_observed(int(im[x,y]))
-
+            variableY.set_observed(int(im[i,j]))
+            
             # set all factors
-            X_Yfactor           = Factor('%s, %s'% (nodeY.name,nodeX.name), xy_factor , [nodeY, nodeX])
-
+            X_Yfactor           = Factor('%s, %s'% (variableY.name,variableX.name), xy_factor , [variableY, variableX]) 
+            factors.append(X_Yfactor)
             if i > 0:
-                X_Xleft_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,nodeX.name), neighbour_factor , [x_nodes[i-1][j], nodeX])
-
+                X_Xleft_factor  = Factor('%s, %s'% (x_nodes[i-1][j].name,variableX.name), neighbour_factor , [x_nodes[i-1][j], variableX])
+                factors.append(X_Xleft_factor)
+                
             if j > 0:
-                X_Xup_factor    = Factor('%s, %s'% (x_nodes[i][j-1].name,nodeX.name), neighbour_factor , [x_nodes[i][j-1], nodeX])
-
+                X_Xup_factor    = Factor('%s, %s'% (x_variable_row[j-1].name,variableX.name), neighbour_factor , [x_variable_row[j-1], variableX])
+                factors.append(X_Xup_factor)
+                
             # append to lists
-            x_node_row.append(nodeX)
-            y_nodes.append(nodeY)
-            factors.extend([X_Yfactor,X_Xleft_factor,X_Xup_factor])
+            
+            x_variable_row.append(variableX)
+            y_nodes.append(variableY)            
+            
+            
+        x_nodes.append(x_variable_row)
 
-        x_nodes.append(x_node_row)
-
-    x_nodes = x_nodes.flatten()
+    x_nodes = np.array(x_nodes).flatten()
+    print 'done'
     return (x_nodes, y_nodes, factors)
 
 def get_neighbour_factor(path):
@@ -403,6 +406,8 @@ def test_loopy():
     for node in nodes:
         if isinstance(node, Variable):
             print(str(node).ljust(20) + ' its maximum state: ' + str(node.max_state()))
+    img_to_graph('dalmation2.png')
+
 
 def test_sum_product():
     graph = instantiate1()
