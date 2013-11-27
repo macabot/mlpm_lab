@@ -1,7 +1,6 @@
 from pylab import imread, gray
 import numpy as np
 import random
-<<<<<<< HEAD
 from matplotlib import pyplot as plt
 
 class Node(object):
@@ -314,6 +313,7 @@ def instantiate1():
 
     nodes['Influenza'].set_observed(1)
     return nodes
+<<<<<<< HEAD
 
 
 def graph_to_img(xnodes):
@@ -400,17 +400,25 @@ def im_to_graph(im, fact_prob=[0.9,0.9,0.9]):
     print 'done'
     return (x_nodes, y_nodes, factors)
 
-def denoise_img(path, fact_probs):
+def denoise_img(path, fact_probs=[0.9, 0.9, 0.9):
     """ Denoises and images given the fact_probs and the path to the image """
 
-    # denoise
+    max_iterations = 5000
+
+    # create noisy graph
+    im = np.mean(imread(path), axis=2) > 0.5
+    noise = np.random.rand(*im.shape[0]) > 0.9
+    noise_im = np.logical_xor(noise, im)
 
     # create graph
+    (x_nodes, y_nodes, factors) = im_to_graph(im, [0.9, 0.95, 0.97])
 
     # denoise
+    loopy_max_sum(x_nodes, y_nodes, factors, max_iterations)
 
     # show denoise
-
+    graph_to_im(x_nodes)
+    
 def get_neighbour_factor(path):
     """ get the correct chances in the factor of an image by counting """
 
@@ -560,17 +568,22 @@ def print_graph(graph):
 if __name__ == '__main__':
     #graph = instantiate1()
     #print_graph(graph)
+
     #test_factor_to_variable_sp()
     #test_variable_to_factor_sp()
     #test_factor_to_variable_ms()
     #test_variable_to_factor_ms()
     #test_variable_marginal()
+
     #test_sum_product()
     #test_max_sum()
-    impath_to_graph('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
-    impath_to_graph('../../lab2/dalmation2.png', [0.9, 0.95, 0.97], True)
-    #impath_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
+
     #get_neighbour_factor('../../lab2/dalmatian1.png')
+
+    #im = np.mean(imread(path), axis=2) > 0.5
+    #im_to_graph(im, [0.9, 0.95, 0.97])
+
     #test_loopy('../../lab2/dalmation2.png')
-    #denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
+    denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
+
     pl.show()
