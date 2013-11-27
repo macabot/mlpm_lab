@@ -1,6 +1,7 @@
 from pylab import imread, gray
 import numpy as np
 import random
+from matplotlib import pyplot as plt
 
 class Node(object):
     """
@@ -319,7 +320,21 @@ def instantiate1():
 
     nodes['Influenza'].set_observed(1)
     return nodes
-    
+
+
+def graph_to_img(xnodes):
+    new_img = np.zeros(xnodes.shape)
+    for i in range(xnodes.shape[0]):
+        for j in range(xnodes.shape[1]):
+            #print xnodes[i][j].max_state()
+            if xnodes[i][j].max_state() >= 1:
+                new_img[i][j] = True
+            else: 
+                new_img[i][j] = False
+                
+    plt.imshow(new_img, interpolation='nearest')
+    plt.show()
+            
 def img_to_graph(path, fact_prob=[0.9,0.9,0.9]):
     """ Convert an img in path to a graph """
 
@@ -369,8 +384,10 @@ def img_to_graph(path, fact_prob=[0.9,0.9,0.9]):
             
             
         x_nodes.append(x_variable_row)
-
+        
+    graph_to_img(np.array(x_nodes))
     x_nodes = np.array(x_nodes).flatten()
+    
     print 'done'
     return (x_nodes, y_nodes, factors)
 
