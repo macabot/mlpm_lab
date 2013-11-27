@@ -39,7 +39,7 @@ class Node(object):
         raise Exception('Method send_ms_msg not implemented in base-class Node')
 
     def receive_msg(self, other, msg):
-        print '%s -> %s receive_msg: %s' % (other.name, self.name, msg)
+        #print '%s -> %s receive_msg: %s' % (other.name, self.name, msg)
         # Store the incomming message, replacing previous messages from the same node
         self.in_msgs[other] = msg
 
@@ -157,7 +157,7 @@ class Variable(Node):
             raise Exception('%s is not pending' % (other.name,))
 
         # multiply the incoming msgs with eachother
-        messages = [self.in_msgs[node] for node in self.neighbours if node != other]
+        messages = [self.in_msgs[node] for node in self.neighbours if node != other and node in self.in_msgs]
 
         out_msg = np.log(self.observed_state)
         out_msg += np.add.reduce(messages)
@@ -263,33 +263,26 @@ def max_sum(node_list):
             pending_node = iter(node.pending).next()
             node.send_ms_msg(pending_node)
 
-def loopy_max_sum(nodes, max_iterations):
+def loopy_max_sum(x_nodes, y_nodes, factors, max_iterations):
     """pass messages from randomly chosen nodes iteratively until no more
     pending messages are created or a maximum number of iterations is reached.
     """
-    has_pending_nodes = set([])
-    # initialize pending messages for leaf nodes
-    for node in nodes:
-        if len(node.neighbours) == 1:
-            node.pending = set([node.neighbours[0]])
-            has_pending_nodes.add(node)
+    variables = list(x_nodes) + y_nodes
+    # initialize pending messages for x and y nodes
+    for var in variables:
+        var.pending = set(var.neighbours)
     # send messages to pending nodes
-    iteration = 0
-    while len(has_pending_nodes) > 0 and iteration < max_iterations:
-        node = random.sample(has_pending_nodes, 1)[0]
-        has_pending_nodes.remove(node)
-        while len(node.pending) > 0:
-            pending_node = iter(node.pending).next()
-            node.send_ms_msg(pending_node)
-            if len(pending_node.pending) > 0:
-                has_pending_nodes.add(pending_node)
+    for i in xrange(max_iterations):
+        print 'iteration %s' % i
+        for var in variables:
+            while len(var.pending) > 0:
+                pending_node = iter(var.pending).next()
+                var.send_ms_msg(pending_node)
 
-        iteration += 1
-
-    if len(has_pending_nodes) == 0:
-        print 'no more pending messages'
-    elif iteration >= max_iteratations:
-        print 'reached max iterations'
+        for fac in factors:
+            while len(fac.pending) > 0:
+                pending_node = iter(fac.pending).next()
+                fac.send_ms_msg(pending_node)
 
 def instantiate1():
     """
@@ -418,12 +411,10 @@ def get_neighbour_factor(path):
 
     print (x_diff, y_diff)
 
-def test_loopy(path, fact_probs):
-    #graph = instantiate1()
-    graph = img_to_graph(path, fact_probs )
-    nodes = graph.values()
-    loopy_max_sum(nodes, len(nodes)*3)
-    for node in nodes:
+def test_loopy(path):
+    (x_nodes, y_nodes, factors) = img_to_graph(path)
+    loopy_max_sum(x_nodes, y_nodes, factors, 10)
+    for node in x_nodes:
         if isinstance(node, Variable):
             print(str(node).ljust(20) + ' its maximum state: ' + str(node.max_state()))
     img_to_graph('dalmation2.png')
@@ -553,5 +544,6 @@ if __name__ == '__main__':
     #test_max_sum()
     #img_to_graph('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
     #img_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
+    test_loopy('./dalmation2.png')
     #get_neighbour_factor('../../lab2/dalmatian1.png')
-    test_loopy('../../lab2/dalmation2.png')
+    #test_loopy('../../lab2/dalmation2.png')
