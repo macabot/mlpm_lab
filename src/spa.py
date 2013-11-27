@@ -1,5 +1,6 @@
 from pylab import imread, gray
 import numpy as np
+import random
 
 class Node(object):
     """
@@ -261,6 +262,34 @@ def max_sum(node_list):
             pending_node = iter(node.pending).next()
             node.send_ms_msg(pending_node)
 
+def loopy_max_sum(nodes, max_iterations):
+    """pass messages from randomly chosen nodes iteratively until no more
+    pending messages are created or a maximum number of iterations is reached.
+    """
+    has_pending_nodes = set([])
+    # initialize pending messages for leaf nodes
+    for node in nodes:
+        if len(node.neighbours) == 1:
+            node.pending = set([node.neighbours[0]])
+            has_pending_nodes.add(node)
+    # send messages to pending nodes
+    iteration = 0
+    while len(has_pending_nodes) > 0 and iteration < max_iterations:
+        node = random.sample(has_pending_nodes, 1)[0]
+        has_pending_nodes.remove(node)
+        while len(node.pending) > 0:
+            pending_node = iter(node.pending).next()
+            node.send_ms_msg(pending_node)
+            if len(pending_node.pending) > 0:
+                has_pending_nodes.add(pending_node)
+
+        iteration += 1
+
+    if len(has_pending_nodes) == 0:
+        print 'no more pending messages'
+    elif iteration >= max_iteratations:
+        print 'reached max iterations'
+
 def instantiate1():
     """
     First assignment of notebook, instantiate the network provided
@@ -363,7 +392,11 @@ def get_neighbour_factor(path):
 
     print (x_diff, y_diff)
 
-
+def test_loopy():
+    graph = instantiate1()
+    nodes = graph.values()
+    loopy_max_sum(nodes, len(nodes)*3) 
+    
 def test_sum_product():
     graph = instantiate1()
     names = ['SoreThroat', 'Fever', 'Coughing', 'Wheezing', 'priorIN',
@@ -485,7 +518,7 @@ if __name__ == '__main__':
     #test_variable_to_factor_ms()
     #test_variable_marginal()
     #test_sum_product()
-    test_max_sum()
+    #test_max_sum()
     #img_to_graph('../../lab2/dalmatian1.png')
     #img_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
-    #get_neighbour_factor('../../lab2/dalmatian1.png')
+    test_loopy()
