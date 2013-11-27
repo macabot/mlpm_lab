@@ -330,22 +330,6 @@ def graph_to_img(xnodes):
     plt.show()
             
    
-def impath_to_graph(path, fact_prob=[0.9,0.9,0.9], denoise=False):
-    """ 
-    Convert the image in path to a graph, and add noise if third argument
-    tells it to
-    """
-
-    # load img in BW
-    im = np.mean(imread(path), axis=2) > 0.5
-
-    # denoise if necessary
-    if denoise:
-        noise = np.random.rand(*im.shape) > 0.9
-        im = np.logical_xor(noise, im)
-
-    return im_to_graph(im, fact_prob)
-
     
 def im_to_graph(im, fact_prob=[0.9,0.9,0.9]):
     """ Convert an img in path to a graph """
