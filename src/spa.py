@@ -391,12 +391,18 @@ def denoise_img(path, fact_probs=[0.9, 0.9, 0.9]):
     noise_im = np.logical_xor(noise, im)
 
     # create graph
-    (x_nodes, y_nodes, factors) = im_to_graph(im, [0.9, 0.95, 0.97])
+    (x_nodes, y_nodes, factors) = im_to_graph(noise_im, fact_probs)
 
     # denoise
     loopy_max_sum(x_nodes, y_nodes, factors, max_iterations)
 
     # show denoise
+    plt.gray()
+    plt.imshow(im)
+    plt.figure()
+    plt.gray()
+    plt.imshow(noise_im)
+    plt.figure()
     graph_to_img(x_nodes,im.shape)
     
 def get_neighbour_factor(path):
@@ -586,7 +592,7 @@ if __name__ == '__main__':
     #test_graph_to_img('./dalmation2.png')
     #test_graph_to_img('../../lab2/dalmation2.png')
     #test_loopy('../../lab2/dalmation2.png')
-    denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
+    denoise_img('../../lab2/dalmation2.png', [0.9, 0.70, 0.70])
 
     #test_img_type()
     #pl.show()
