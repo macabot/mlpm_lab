@@ -567,9 +567,10 @@ if __name__ == '__main__':
 
     #get_neighbour_factor('../../lab2/dalmatian1.png')
 
-    #im = np.mean(imread(path), axis=2) > 0.5
-    #im_to_graph(im, [0.9, 0.95, 0.97])
+    im = np.mean(imread('../../lab2/dalmation2.png'), axis=2) > 0.5
+    im_to_graph(im, [0.9, 0.95, 0.97])
 
     #test_loopy('../../lab2/dalmation2.png')
-    denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
+    #denoise_img('../../lab2/dalmation2.png', [0.9, 0.95, 0.97])
 
+    #pl.show()
