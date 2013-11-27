@@ -1,4 +1,4 @@
-from pylad import imread, gray
+from pylab import imread, gray
 import numpy as np
 
 class Node(object):
@@ -346,13 +346,17 @@ def get_neighbour_factor(path):
     # load img in BW
     im = np.mean(imread(path), axis=2) > 0.5
 
+    # initialize
+    x_diff = 0
+    y_diff = 0
+
     # for each row in image starting with second
     for i in range(1, im.shape[0]+1):
-        
+         
         # for each individual pixel column starting with second
         for j in range(1, im.shape[1]+1):
-            x_diff += abs(int(img[i-1,j]) - int(img[i,j])
-            y_diff += abs(int(img[i,j-1]) - int(img[i,j])
+            x_diff += abs(int(im[i-1,j]) - int(im[i,j]))
+            y_diff += abs(int(im[i,j-1]) - int(im[i,j]))
 
     x_diff = x_diff / im.shape[0]
     y_diff = y_diff / im.shape[1]
@@ -481,7 +485,7 @@ if __name__ == '__main__':
     #test_variable_to_factor_ms()
     #test_variable_marginal()
     #test_sum_product()
-    #test_max_sum()
+    test_max_sum()
     #img_to_graph('../../lab2/dalmatian1.png')
     #img_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
-    get_neighbour_factor('../../lab2/dalmatian1.png')
+    #get_neighbour_factor('../../lab2/dalmatian1.png')
