@@ -380,10 +380,10 @@ def get_neighbour_factor(path):
     y_diff = 0
 
     # for each row in image starting with second
-    for i in range(1, im.shape[0]+1):
+    for i in range(1, im.shape[0]):
          
         # for each individual pixel column starting with second
-        for j in range(1, im.shape[1]+1):
+        for j in range(1, im.shape[1]):
             x_diff += abs(int(im[i-1,j]) - int(im[i,j]))
             y_diff += abs(int(im[i,j-1]) - int(im[i,j]))
 
@@ -522,3 +522,4 @@ if __name__ == '__main__':
     #img_to_graph('../../lab2/dalmatian1.png')
     #img_to_graph('D:\students\Rozeboom\mlpm\mlpm_lab\src\dalmatian1.png')
     test_loopy()
+    #get_neighbour_factor('../../lab2/dalmatian1.png')
