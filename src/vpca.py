@@ -7,6 +7,7 @@ class BayesianPCA(object):
     def __init__(self, d, N, a_alpha=10e-3, b_alpha=10e-3, a_tau=10e-3, b_tau=10e-3, beta=10e-3):
         """
         """
+
         self.d = d # number of dimensions
         self.N = N # number of data points
 
@@ -25,7 +26,7 @@ class BayesianPCA(object):
         self.means_w = np.random.randn(d, d)
         self.sigma_w = np.random.randn(d, d)
         self.a_alpha_tilde = np.abs(np.random.randn(1))
-        self.bs_alpha_tilde = np.abs(np.random.randn(d, 1))
+        self.b_alpha_tilde = np.abs(np.random.randn(d, 1))
         self.a_tau_tilde = np.abs(np.random.randn(1))
         self.b_tau_tilde = np.abs(np.random.randn(1))
 
@@ -66,7 +67,6 @@ class BayesianPCA(object):
         beta_n_tau-inv = 1.0 / (self.beta + self.N * tau_exp)
         self.sigma_mu = beta_n_tau_inv * np.eye(self.d) # TODO check size of I
 
-
     def __update_w(self, X):
         """update mean_w and sigma_w"""
         m_x, sigma_x = X
@@ -79,7 +79,18 @@ class BayesianPCA(object):
         self.sigma_w = np.linalg.inv(diag_exp_alpha + tau_sum_xn)
 
     def __update_alpha(self):
-        pass
+        """ 
+        update b_alpha_tilde, a_alpha_tilde does not change 
+
+        b_alpha_tilde[i] = b_alpha + < || w[i] ||^2 > / 2
+        """
+
+        # variables necessary in calculations
+        # todo: not sure if to power 2
+        w_norm = np.power(np.linalg.norm(self.means_w, axis=1),2)
+        
+        # update each element in b_alpha_tilde (todo: remove for loop)
+        self.b_alpha_tilde = self.b_alpha + w_norm / 2
 
     def __update_tau(self, X):
         t_norm_sq = np.power(np.linalg.norm(self.data))
@@ -92,4 +103,7 @@ class BayesianPCA(object):
         return L
 
     def fit(self, X):
+
+        # todo: fit a_alpha
+
         pass
