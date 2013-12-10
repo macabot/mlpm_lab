@@ -41,28 +41,21 @@ class BayesianPCA(object):
 
         m_x = <tau> * E_x * <W^t> * (t_n - <mu>)
         E_x = (I + <tau> <W^t*W>)^-1
-
-        TODO
         """
+        
+        # variables necessary in calculations
+        tau_exp = self.a_tau_tilde / self.b_tau_tilde
+        W_exp_T = np.multiply.reduce(self.means_w)
+        mu_exp = self.mean_mu
 
         # update sigma, equal for all n's
-        X[1] = 0 # TODO
+        X[1] = (np.ones(
 
-        # variables necessary in calculations
-        tau_exp = 0 # TODO
-        W_exp_T = 0 # TODO
-        mu_exp = 0  # TODO
-
-        # update each n
-        for i in len(X[0]):
-            # update mean of n
-            X[0][i] = tau_exp * X[1] * W_exp_T * (self.data[i] - mu_exp)
-        
-        return X
+        # update mean
+        X[0] = np.dot(np.dot(np.dot(tau_exp, X[1]), W_exp_T), (self.data - mu_exp))
     
     def __update_mu(self):
-        pass
-    
+   
     def __update_w(self, X):
         pass
     
