@@ -31,7 +31,13 @@ class BayesianPCA(object):
         self.b_tau_tilde = np.abs(np.random.randn(1))
 
         # set data TODO
-        self.data = 0
+        Sigma = np.diag([5,4,3,2,1,1,1,1,1,1])
+        self.data = np.random.multivariate_normal(np.zeros(d), Sigma, N).T
+
+        covv = np.cov(self.data)
+
+        print(covv)
+        print(covv.shape)
 
     def __update_z(self, X):
         """
@@ -46,7 +52,7 @@ class BayesianPCA(object):
 
         # variables necessary in calculations
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
-        W_exp = np.multiply.reduce(self.means_w)
+        W_exp = np.multiply.reduce(self.means_w) # TODO: not sure
         mu_exp = self.mean_mu
 
         # update sigma, equal for all n's
@@ -86,10 +92,10 @@ class BayesianPCA(object):
         """
 
         # variables necessary in calculations
-        # todo: not sure if to power 2
+        # TODO: not sure 
         w_norm = np.power(np.linalg.norm(self.means_w, axis=1),2)
         
-        # update each element in b_alpha_tilde (todo: remove for loop)
+        # update each element in b_alpha_tilde 
         self.b_alpha_tilde = self.b_alpha + w_norm / 2
 
     def __update_tau(self, X):
@@ -104,6 +110,33 @@ class BayesianPCA(object):
 
     def fit(self, X):
 
-        # todo: fit a_alpha
+        # set constant parameters
+        self.a_alpha_tilde = self.a_alpha + self.d / 2
+        self.a_tau_tilde = self.a_tau + N*d / 2
 
+        it = 1000
+        converged = False
+        while not converged and it > 0: 
+            # run each update
+            __update_z(X)
+            __update_mu(X)
+            __update_w(X)
+            __update_alpha(X)
+            __update_tau(X)
+
+            it -= 1
+            # TODO: decide on converged
+
+    def getX():
+        """ Calculates X """
+        # TODO
         pass
+
+def run():
+    vpca = BayesianPCA(10, 1000)
+    X = vpca.getX() # TODO
+    vpca.fit(X)
+
+if __name__ == '__main__':
+    run()
+
