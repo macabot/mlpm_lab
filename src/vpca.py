@@ -64,9 +64,9 @@ class BayesianPCA(object):
         """update mean_mu and sigma_mu"""
         m_x, sigma_x = X
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
-
+        
         sum_t_w_x = np.sum(self.data - np.dot(self.means_w, m_x), axis=1)
-        self.mean_mu = np.dot(np.dot(tau_exp, self.sigma_mu), sum_t_w_x)
+        self.mean_mu = np.dot(tau_exp * self.sigma_mu, sum_t_w_x)
 
         beta_n_tau_inv = 1.0 / (self.beta + self.N * tau_exp)
         self.sigma_mu = beta_n_tau_inv * np.eye(self.d) # TODO check size of I
@@ -128,7 +128,7 @@ class BayesianPCA(object):
 
 
 def run():
-    vpca = BayesianPCA(10, 1000)
+    vpca = BayesianPCA(10, 2)
     X = [[0],0] # set X random
     vpca.fit(X)
 
