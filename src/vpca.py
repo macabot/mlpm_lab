@@ -47,8 +47,10 @@ class BayesianPCA(object):
         m_x = <tau> * E_x * <W^t> * (t_n - <mu>)
         E_x = (I + <tau> <W^t*W>)^-1
 
-        # TODO: what is self.means_z and self.sigma_z if not those of X?
         """
+
+        # TODO: what is self.means_z and self.sigma_z if not those of X?
+
 
         # variables necessary in calculations
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
@@ -120,9 +122,15 @@ class BayesianPCA(object):
        
         self.b_alpha_tilde = self.b_alpha + w_norm / 2
 
-        exit()
-
     def __update_tau(self, X):
+        """
+        Update b_tau_tilde, as a_tau_tilde is independent of other update rules
+
+        b_tau_tilde = b_tau + 1/2 sum ( Z  ) 
+        where Z = 
+        || t_n || ^2 + <|| mu ||^2> + Tr(<W.T * W> <x_n * x_n.T>) +
+            2 * <mu.T> * <W> * <x_n> - 2 * t_n.T * <W> * <x_n> - 2 * t_n.T * <mu>
+        """
         mean_x, sigma_x = X
         t_norm_sq = np.power(np.linalg.norm(self.data))
         mu_norm_sq = np.power(np.linalg.norm(self.mean_mu))
