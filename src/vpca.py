@@ -30,14 +30,10 @@ class BayesianPCA(object):
         self.a_tau_tilde = np.abs(np.random.randn(1))
         self.b_tau_tilde = np.abs(np.random.randn(1))
 
-        # set data TODO
+        # set data 
         Sigma = np.diag([5,4,3,2,1,1,1,1,1,1])
         self.data = np.random.multivariate_normal(np.zeros(d), Sigma, N).T
 
-        covv = np.cov(self.data)
-
-        print(covv)
-        print(covv.shape)
 
     def __update_z(self, X):
         """
@@ -55,8 +51,21 @@ class BayesianPCA(object):
         W_exp = np.multiply.reduce(self.means_w) # TODO: not sure
         mu_exp = self.mean_mu
 
+        """
+        temp1 = np.eye(self.d, self.d)
+        temp2 = np.dot(W_exp.T, W_exp)
+        np.dot(tau_exp, temp2)
+        temp3 = temp1 + temp2
+        np.linalg.inv(temp3)
+
+        print(temp1)
+        print(temp2)
+        print(temp3)
+        """
+
+
         # update sigma, equal for all n's
-        X[1] = np.linalg.inv(np.eye(d,d) + np.dot(tau_exp, np.dot(W_exp.T, W_exp)))
+        X[1] = np.linalg.inv(np.eye(self.d,self.d) + np.dot(tau_exp, np.dot(W_exp.T, W_exp)))
 
         # update mean
         X[0] = np.dot(np.dot( tau_exp * X[1], W_exp.T), (self.data - mu_exp))
@@ -70,7 +79,7 @@ class BayesianPCA(object):
         sum_t_w_x = np.sum(self.data - np.dot(self.means_w, m_x), axis=1)
         self.mean_mu = np.dot(np.dot(tau_exp, self.sigma_mu), sum_t_w_x)
 
-        beta_n_tau-inv = 1.0 / (self.beta + self.N * tau_exp)
+        beta_n_tau_inv = 1.0 / (self.beta + self.N * tau_exp)
         self.sigma_mu = beta_n_tau_inv * np.eye(self.d) # TODO check size of I
 
     def __update_w(self, X):
@@ -112,29 +121,26 @@ class BayesianPCA(object):
 
         # set constant parameters
         self.a_alpha_tilde = self.a_alpha + self.d / 2
-        self.a_tau_tilde = self.a_tau + N*d / 2
+        self.a_tau_tilde = self.a_tau + self.N*self.d / 2
 
         it = 1000
         converged = False
         while not converged and it > 0: 
+            print("Updating iteration " + str(it))
             # run each update
-            __update_z(X)
-            __update_mu(X)
-            __update_w(X)
-            __update_alpha(X)
-            __update_tau(X)
+            self.__update_z(X)
+            self.__update_mu(X)
+            self.__update_w(X)
+            self.__update_alpha(X)
+            self.__update_tau(X)
 
             it -= 1
             # TODO: decide on converged
 
-    def getX():
-        """ Calculates X """
-        # TODO
-        pass
 
 def run():
     vpca = BayesianPCA(10, 1000)
-    X = vpca.getX() # TODO
+    X = [[0],0] # set X random
     vpca.fit(X)
 
 if __name__ == '__main__':
