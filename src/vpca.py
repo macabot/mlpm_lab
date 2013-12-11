@@ -1,3 +1,4 @@
+import copy
 import scipy.special as sp
 from matplotlib import pyplot as plt
 import numpy as np
@@ -176,11 +177,82 @@ class BayesianPCA(object):
             # TODO: decide on converged
 
 
+    def test_shapes(self, X):
+        """
+        This test simply tests whether the shapes of the 
+        important variables change. If they do, a warning is produced
+        """
+        
+
+        shapes = self.get_shapes()
+        # run tests while updating
+        self.__update_z(X)
+        self.test_shape(shapes, X)
+
+        self.__update_mu(X)
+        self.test_shape(shapes, X)
+
+        self.__update_w(X)
+        self.test_shape(shapes, X)
+
+        self.__update_alpha()
+        self.test_shape(shapes, X)
+
+        self.__update_tau(X)
+        self.test_shape(shapes, X)
+
+
+    def get_shapes(self):
+        """
+        Returns the shape of all important variables in vpca
+        """
+
+        m_mu_shape = copy.copy(self.mean_mu.shape)
+        s_mu_shape = copy.copy(self.sigma_mu.shape)
+
+        m_w_shape = copy.copy(self.means_w.shape)
+        s_w_shape = copy.copy(self.sigma_w.shape)
+
+        b_a_t_shape = copy.copy(self.b_alpha_tilde.shape)
+        b_t_t_shape = copy.copy(self.b_tau_tilde.shape)
+
+        return (m_mu_shape, s_mu_shape, m_w_shape, s_w_shape, b_a_t_shape, b_t_t_shape)
+
+    def test_shape(self, orig_shapes, X):
+        """
+        Tests whether the shapes in oldvpca are equal to those in
+        newvpca
+        """
+
+        print("Testing shapes")
+
+        assert orig_shapes[0] == self.mean_mu.shape, "mean_mu: " + str(self.mean_mu.shape) + ", should have been: " + str(orig_shapes[0])
+
+        assert orig_shapes[1] == self.sigma_mu.shape, 'sigma_mu: ' + str(self.sigma_mu.shape) + ', should have been: ' + str(orig_shapes[1])
+
+        assert orig_shapes[2] == self.means_w.shape, 'means_w: ' + str(self.means_w.shape) + ', should have been: ' + str(orig_shapes[2])
+        
+        assert orig_shapes[3] == self.sigma_w.shape, 'sigma_w: ' + str(self.sigma_w.shape) + ', should have been: ' + str(orig_shapes[3])
+
+        assert orig_shapes[4] == self.b_alpha_tilde.shape, 'b_alpha_tilde: ' + str(self.b_alpha_tilde.shape) + ', should have been: ' + str(orig_shapes[4])
+
+        assert orig_shapes[5] == self.b_tau_tilde.shape, 'b_tau_tilde: ' + str(self.b_tau_tilde.shape) + ', should have been: ' + str(orig_shapes[5])
+
+
+        print("Testing succceeded")
+   
+
 def run():
     vpca = BayesianPCA(10, 2)
     X = [[0],0] # set X random
     vpca.fit(X)
 
+def run_shapes():
+    vpca = BayesianPCA(10, 2)
+    X = [[0],0] # set X random
+    vpca.test_shapes(X)
+
 if __name__ == '__main__':
-    run()
+    #run()
+    run_shapes()
 
