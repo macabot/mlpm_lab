@@ -48,28 +48,17 @@ class BayesianPCA(object):
 
         # variables necessary in calculations
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
-        W_exp = np.multiply.reduce(self.means_w) # TODO: not sure
         mu_exp = self.mean_mu
-
-        """
-        temp1 = np.eye(self.d, self.d)
-        temp2 = np.dot(W_exp.T, W_exp)
-        np.dot(tau_exp, temp2)
-        temp3 = temp1 + temp2
-        np.linalg.inv(temp3)
-
-        print(temp1)
-        print(temp2)
-        print(temp3)
-        """
+        WT_W_exp = 0; # TODO
+        WT_exp = self.means_w.T
 
 
         # update sigma, equal for all n's
-        X[1] = np.linalg.inv(np.eye(self.d,self.d) + np.dot(tau_exp, np.dot(W_exp.T, W_exp)))
+        X[1] = np.linalg.inv(np.eye(self.d,self.d) + tau_exp * WT_W_exp)
 
-        # update mean
-        X[0] = np.dot(np.dot( tau_exp * X[1], W_exp.T), (self.data - mu_exp))
-
+        # update mean TODO
+        #X[0] = np.dot(np.dot( tau_exp * X[1], WT_exp), (self.data - mu_exp))
+        X[0] = np.random.randn(self.data.shape[0], self.data.shape[1])
 
     def __update_mu(self, X):
         """update mean_mu and sigma_mu"""
@@ -101,7 +90,7 @@ class BayesianPCA(object):
         """
 
         # variables necessary in calculations
-        # TODO: not sure 
+        # TODO: not sure, correction: pretty sure it is wrong
         w_norm = np.power(np.linalg.norm(self.means_w, axis=1),2)
         
         # update each element in b_alpha_tilde 
