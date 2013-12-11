@@ -6,6 +6,8 @@ class BayesianPCA(object):
 
     def __init__(self, d, N, a_alpha=10e-3, b_alpha=10e-3, a_tau=10e-3, b_tau=10e-3, beta=10e-3):
         """
+        Initializes parameters randomly such that they can be used
+        by updating later
         """
 
         self.d = d # number of dimensions
@@ -37,13 +39,15 @@ class BayesianPCA(object):
 
     def __update_z(self, X):
         """
-        updates X (projection of data points?)
+        updates X 
         X is the prod over datapoints: N(x_n | m_x, Sigma_n)
         X[0][n] stands for nth mean
         X[1] stands for sigma
 
         m_x = <tau> * E_x * <W^t> * (t_n - <mu>)
         E_x = (I + <tau> <W^t*W>)^-1
+
+        # TODO: what is self.means_z and self.sigma_z if not those of X?
         """
 
         # variables necessary in calculations
@@ -61,15 +65,24 @@ class BayesianPCA(object):
         X[0] = np.random.randn(self.data.shape[0], self.data.shape[1])
 
     def __update_mu(self, X):
-        """update mean_mu and sigma_mu"""
+        """
+        update mean_mu and sigma_mu
+
+        sigma_mu = (beta + N * <tau>)^-1 * I
+        mean_mu = <tau> * sigma_mu * sum( data_n - <W> * <X_n> ) 
+        """
+
+        # necessary for calculations
         m_x, sigma_x = X
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
-        
         sum_t_w_x = np.sum(self.data - np.dot(self.means_w, m_x), axis=1, keepdims=True)
+        
+        # update sigma_mu
+        self.sigma_mu = (1.0 / (self.beta + self.N * tau_exp)) * np.eye(self.d)
+
+        # update mean_mu
         self.mean_mu = np.dot(tau_exp * self.sigma_mu, sum_t_w_x)
 
-        beta_n_tau_inv = 1.0 / (self.beta + self.N * tau_exp)
-        self.sigma_mu = beta_n_tau_inv * np.eye(self.d) 
 
     def __update_w(self, X):
         """update mean_w and sigma_w"""
