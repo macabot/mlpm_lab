@@ -117,7 +117,8 @@ class BayesianPCA(object):
 
         # update each element in b_alpha_tilde
         # TODO: not sure, correction: pretty sure it is wrong
-        w_norm = np.power(np.linalg.norm(self.means_w, axis=1),2)
+        w_norm = np.power(np.linalg.norm(self.means_w, axis=0), 2)
+        w_norm = np.reshape(w_norm, (self.d, 1)) # reshape from (d,) to (d,1)
 
         self.b_alpha_tilde = self.b_alpha + w_norm / 2
 
@@ -131,23 +132,25 @@ class BayesianPCA(object):
             2 * <mu.T> * <W> * <x_n> - 2 * t_n.T * <W> * <x_n> - 2 * t_n.T * <mu>
         """
         mean_x, sigma_x = X
-        t_norm_sq = np.power(np.linalg.norm(self.data))
-        mu_norm_sq = np.power(np.linalg.norm(self.mean_mu))
-        # x ~ N(m, Sigma): E[x^T A x] = Tr(A Sigma) + m^T A m
-        exp_wt_w = np.trace(self.sigma_w) + np.dot(self.mean_w.T, self.mean_w)
-        # x ~ N(m, Sigma): E[x x^T] = Sigma + m m^T
-        exp_x_xt = sigma_x + np.dot(mean_x, mean_x.dot)
+        t_norm_sq = np.power(np.linalg.norm(self.data, axis=0), 2)
+        mu_norm_sq = np.power(np.linalg.norm(self.mean_mu, axis=0), 2)
+
+        # TODO what is <W.T W>
+        #exp_wt_w = np.trace(self.sigma_w) + np.dot(self.means_w.T, self.means_w)
+        exp_wt_w = np.eye(self.d) # TODO fix
+        exp_x_xt = self.N * sigma_x + np.dot(mean_x, mean_x.T)
 
         trace_w_x = np.trace(np.dot(exp_wt_w, exp_x_xt))
+        
+        mu_w_x = np.dot(np.dot(self.mean_mu.T, self.means_w), mean_x)
 
-        mu_w_x = np.dot(np.dot(self.mean_mu, self.mean_w), mean_x)
-
-        t_w_x = np.dot(np.dot(self.data.T, self.mean_w), mean_x)
+        t_w_x = np.dot(np.dot(self.data.T, self.means_w), mean_x)
 
         t_mu = np.dot(self.data.T, self.mean_mu)
 
-        big_sum = np.sum(t_norm_sq + mu_norm_sq + trace_w_x + 2*mu_w_x - 2*t_w_x - 2*t_mu , axis=1)
-
+        big_sum = np.sum(t_norm_sq) + self.N * mu_norm_sq + trace_w_x + \
+                  2*np.sum(mu_w_x) - 2*np.trace(t_w_x) - 2*np.sum(t_mu)
+        
         self.b_tau_tilde = self.b_tau + 0.5*big_sum
 
     def L(self, X):
