@@ -75,9 +75,13 @@ class BayesianPCA(object):
         """update mean_w and sigma_w"""
         m_x, sigma_x = X
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
-        sum_x_t_mu = np.sum(np.dot(m_x, (self.data - self.mean_mu)), axis=1)
-        self.mean_w = np.dot(np.dot(tau_exp, self.sigma_w), sum_x_t_mu)
 
+        einsum_result = np.einsum('kj,ij->ik', self.data - self.mean_mu, X[0])
+
+        # self.sigma_w is used before calculated?
+        self.means_w = np.dot(np.dot(tau_exp, self.sigma_w), einsum_result)
+
+         
         diag_exp_alpha = np.diag(self.a_alpha_tilde / self.bs_alpha_tilde)
         tau_sum_xn = tau_exp * np.sum(np.dot(m_x, m_x), axis=1)
         self.sigma_w = np.linalg.inv(diag_exp_alpha + tau_sum_xn)
@@ -92,9 +96,11 @@ class BayesianPCA(object):
         # variables necessary in calculations
         # TODO: not sure, correction: pretty sure it is wrong
         w_norm = np.power(np.linalg.norm(self.means_w, axis=1),2)
-        
+       
         # update each element in b_alpha_tilde 
         self.b_alpha_tilde = self.b_alpha + w_norm / 2
+
+        exit()
 
     def __update_tau(self, X):
         t_norm_sq = np.power(np.linalg.norm(self.data))
@@ -120,7 +126,7 @@ class BayesianPCA(object):
             self.__update_z(X)
             self.__update_mu(X)
             self.__update_w(X)
-            self.__update_alpha(X)
+            self.__update_alpha()
             self.__update_tau(X)
 
             it -= 1
