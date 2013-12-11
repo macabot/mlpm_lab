@@ -123,10 +123,25 @@ class BayesianPCA(object):
         exit()
 
     def __update_tau(self, X):
+        mean_x, sigma_x = X
         t_norm_sq = np.power(np.linalg.norm(self.data))
         mu_norm_sq = np.power(np.linalg.norm(self.mean_mu))
-        t_mu = t_norm_sq + mu_norm_sq
-        # TODO continue
+        # x ~ N(m, Sigma): E[x^T A x] = Tr(A Sigma) + m^T A m
+        exp_wt_w = np.trace(self.sigma_w) + np.dot(self.mean_w.T, self.mean_w)
+        # x ~ N(m, Sigma): E[x x^T] = Sigma + m m^T
+        exp_x_xt = sigma_x + np.dot(mean_x, mean_x.dot)
+        
+        trace_w_x = np.trace(np.dot(exp_wt_w, exp_x_xt))
+        
+        mu_w_x = np.dot(np.dot(self.mean_mu, self.mean_w), mean_x)
+        
+        t_w_x = np.dot(np.dot(self.data.T, self.mean_w), mean_x)
+        
+        t_mu = np.dot(self.data.T, self.mean_mu)
+        
+        big_sum = np.sum(t_norm_sq + mu_norm_sq + trace_w_x + 2*mu_w_x - 2*t_w_x - 2*t_mu , axis=1)
+        
+        self.b_tau_tilde = self.b_tau + 0.5*big_sum
 
     def L(self, X):
         L = 0.0
