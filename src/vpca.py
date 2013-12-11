@@ -65,11 +65,11 @@ class BayesianPCA(object):
         m_x, sigma_x = X
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
         
-        sum_t_w_x = np.sum(self.data - np.dot(self.means_w, m_x), axis=1)
+        sum_t_w_x = np.sum(self.data - np.dot(self.means_w, m_x), axis=1, keepdims=True)
         self.mean_mu = np.dot(tau_exp * self.sigma_mu, sum_t_w_x)
 
         beta_n_tau_inv = 1.0 / (self.beta + self.N * tau_exp)
-        self.sigma_mu = beta_n_tau_inv * np.eye(self.d) # TODO check size of I
+        self.sigma_mu = beta_n_tau_inv * np.eye(self.d) 
 
     def __update_w(self, X):
         """update mean_w and sigma_w"""
