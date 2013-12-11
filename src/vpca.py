@@ -99,7 +99,7 @@ class BayesianPCA(object):
         m_x, sigma_x = X
         # TODO: is the expected value over alpha not a mixture?
         diag_exp_alpha = np.diag(self.a_alpha_tilde / self.b_alpha_tilde)
-        tau_sum_xn = tau_exp * np.sum(np.dot(m_x, m_x), axis=1) # np.dot(a,a) == a * a.T ? 
+        tau_sum_xn = tau_exp * np.sum(np.dot(m_x, m_x.T), axis=1) 
         self.sigma_w = np.linalg.inv(diag_exp_alpha + tau_sum_xn)
 
         # update means_w
@@ -114,11 +114,10 @@ class BayesianPCA(object):
         b_alpha_tilde[i] = b_alpha + < || w[i] ||^2 > / 2
         """
 
-        # variables necessary in calculations
+        # update each element in b_alpha_tilde 
         # TODO: not sure, correction: pretty sure it is wrong
         w_norm = np.power(np.linalg.norm(self.means_w, axis=1),2)
        
-        # update each element in b_alpha_tilde 
         self.b_alpha_tilde = self.b_alpha + w_norm / 2
 
         exit()
