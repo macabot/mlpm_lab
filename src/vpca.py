@@ -56,7 +56,6 @@ class BayesianPCA(object):
         WT_W_exp = 0; # TODO
         WT_exp = self.means_w.T
 
-
         # update sigma, equal for all n's
         X[1] = np.linalg.inv(np.eye(self.d,self.d) + tau_exp * WT_W_exp)
 
@@ -72,32 +71,44 @@ class BayesianPCA(object):
         mean_mu = <tau> * sigma_mu * sum( data_n - <W> * <X_n> ) 
         """
 
-        # necessary for calculations
-        m_x, sigma_x = X
+        # necessary for calculations of both
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
-        sum_t_w_x = np.sum(self.data - np.dot(self.means_w, m_x), axis=1, keepdims=True)
-        
-        # update sigma_mu
+       
+        # update sigma_mu first as it is used in updating mean_mu
         self.sigma_mu = (1.0 / (self.beta + self.N * tau_exp)) * np.eye(self.d)
 
         # update mean_mu
+        m_x, sigma_x = X
+        sum_t_w_x = np.sum(self.data - np.dot(self.means_w, m_x), axis=1, keepdims=True)
         self.mean_mu = np.dot(tau_exp * self.sigma_mu, sum_t_w_x)
 
 
     def __update_w(self, X):
-        """update mean_w and sigma_w"""
-        m_x, sigma_x = X
+        """
+        update mean_w and sigma_w
+
+        sigma_w ( diag<alpha> + <tau> * sum( <x_n * x_n.T  )  )
+        mean_w_k = <tau> * sigma_w * sum( <x_n> * ( t_nk - <mu_k>  )  )
+        """
+
+        # necessary for calculations
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
 
-        einsum_result = np.einsum('kj,ij->ik', self.data - self.mean_mu, X[0])
 
-        # self.sigma_w is used before calculated?
+        # update sigma_w first as it is used in updating means_w
+
+        m_x, sigma_x = X
+        # TODO: is the expected value over alpha not a mixture?
+        diag_exp_alpha = np.diag(self.a_alpha_tilde / self.b_alpha_tilde)
+        tau_sum_xn = tau_exp * np.sum(np.dot(m_x, m_x), axis=1) # np.dot(a,a) == a * a.T ? 
+        self.sigma_w = np.linalg.inv(diag_exp_alpha + tau_sum_xn)
+
+        # update means_w
+
+        # einsum calculates for all k the summation over <x_n> * ( t_nk - mu_k)
+        einsum_result = np.einsum('kj,ij->ik', self.data - self.mean_mu, X[0])
         self.means_w = np.dot(np.dot(tau_exp, self.sigma_w), einsum_result)
 
-         
-        diag_exp_alpha = np.diag(self.a_alpha_tilde / self.bs_alpha_tilde)
-        tau_sum_xn = tau_exp * np.sum(np.dot(m_x, m_x), axis=1)
-        self.sigma_w = np.linalg.inv(diag_exp_alpha + tau_sum_xn)
 
     def __update_alpha(self):
         """ 
