@@ -96,7 +96,6 @@ class BayesianPCA(object):
 
 
         # update sigma_w first as it is used in updating means_w
-
         m_x, sigma_x = X
         # TODO: is the expected value over alpha not a mixture?
         diag_exp_alpha = np.diag(self.a_alpha_tilde / self.b_alpha_tilde)
@@ -104,11 +103,9 @@ class BayesianPCA(object):
         self.sigma_w = np.linalg.inv(diag_exp_alpha + tau_sum_xn)
 
         # update means_w
-
         # einsum calculates for all k the summation over <x_n> * ( t_nk - mu_k)
         einsum_result = np.einsum('kj,ij->ik', self.data - self.mean_mu, X[0])
-        self.means_w = np.dot(np.dot(tau_exp, self.sigma_w), einsum_result)
-
+        self.means_w = np.dot(tau_exp * self.sigma_w, einsum_result)
 
     def __update_alpha(self):
         """ 
