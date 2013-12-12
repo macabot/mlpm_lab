@@ -1,6 +1,5 @@
 import copy
-import scipy.special as sp
-from matplotlib import pyplot as plt
+import pylab as pl
 import numpy as np
 
 class BayesianPCA(object):
@@ -252,8 +251,57 @@ def run_shapes():
     vpca = BayesianPCA(10, 2)
     X = [[0],0] # set X random
     vpca.test_shapes(X)
+    
+def show_hinton():
+    vpca = BayesianPCA(10, 2)
+    X = [[0],0] # set X random
+    vpca.test_shapes(X)
+    hinton(vpca.means_w)
+    
+def _blob(x,y,area,colour):
+    """
+    Source: http://wiki.scipy.org/Cookbook/Matplotlib/HintonDiagrams
+    Draws a square-shaped blob with the given area (< 1) at
+    the given coordinates.
+    """
+    hs = np.sqrt(area) / 2
+    xcorners = np.array([x - hs, x + hs, x + hs, x - hs])
+    ycorners = np.array([y - hs, y - hs, y + hs, y + hs])
+    pl.fill(xcorners, ycorners, colour, edgecolor=colour)
+
+def hinton(W, maxWeight=None):
+    """
+    Source: http://wiki.scipy.org/Cookbook/Matplotlib/HintonDiagrams
+    Draws a Hinton diagram for visualizing a weight matrix. 
+    Temporarily disables matplotlib interactive mode if it is on, 
+    otherwise this takes forever.
+    """
+    reenable = False
+    if pl.isinteractive():
+        pl.ioff()
+    pl.clf()
+    height, width = W.shape
+    if not maxWeight:
+        maxWeight = 2**np.ceil(np.log(np.max(np.abs(W)))/np.log(2))
+
+    pl.fill(np.array([0,width,width,0]),np.array([0,0,height,height]),'gray')
+    pl.axis('off')
+    pl.axis('equal')
+    for x in xrange(width):
+        for y in xrange(height):
+            _x = x+1
+            _y = y+1
+            w = W[y,x]
+            if w > 0:
+                _blob(_x - 0.5, height - _y + 0.5, min(1,w/maxWeight),'white')
+            elif w < 0:
+                _blob(_x - 0.5, height - _y + 0.5, min(1,-w/maxWeight),'black')
+    if reenable:
+        pl.ion()
+    pl.show()
 
 if __name__ == '__main__':
     #run()
-    run_shapes()
+    #run_shapes()
+    show_hinton()
 
