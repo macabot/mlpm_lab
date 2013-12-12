@@ -141,16 +141,16 @@ class BayesianPCA(object):
         exp_x_xt = self.N * sigma_x + np.dot(mean_x, mean_x.T)
 
         trace_w_x = np.trace(np.dot(exp_wt_w, exp_x_xt))
-        
+
         mu_w_x = np.dot(np.dot(self.mean_mu.T, self.means_w), mean_x)
 
-        t_w_x = np.dot(np.dot(self.data.T, self.means_w), mean_x)
+        t_w_x = np.dot(self.data.T, self.means_w).T * mean_x
 
         t_mu = np.dot(self.data.T, self.mean_mu)
 
         big_sum = np.sum(t_norm_sq) + self.N * mu_norm_sq + trace_w_x + \
-                  2*np.sum(mu_w_x) - 2*np.trace(t_w_x) - 2*np.sum(t_mu)
-        
+                  2*np.sum(mu_w_x) - 2*np.sum(t_w_x) - 2*np.sum(t_mu)
+
         self.b_tau_tilde = self.b_tau + 0.5*big_sum
 
     def L(self, X):
