@@ -56,6 +56,7 @@ class BayesianPCA(object):
     def __update_mu(self, X):
         """
         update mean_mu and sigma_mu
+        X is data
 
         sigma_mu = (beta + N * <tau>)^-1 * I
         mean_mu = <tau> * sigma_mu * sum( X_n - <W> * <z_n> )
@@ -74,22 +75,21 @@ class BayesianPCA(object):
         """
         update mean_w and sigma_w
 
-        sigma_w ( diag<alpha> + <tau> * sum( <x_n * x_n.T  )  )
-        mean_w_k = <tau> * sigma_w * sum( <x_n> * ( t_nk - <mu_k>  )  )
+        sigma_w ( diag<alpha> + <tau> * sum( <z_n * z_n.T  )  )
+        mean_w_k = <tau> * sigma_w * sum( <z_n> * ( X_nk - <mu_k>  )  )
         """
         # necessary for calculations
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
 
         # update sigma_w first as it is used in updating means_w
-        mean_x, sigma_x = X
-        a_over_b = self.a_alpha_tilde / self.b_alpha_tilde
-        diag_exp_alpha = np.diag(a_over_b.T[0])
-        tau_sum_xn = tau_exp * (self.N * sigma_x + np.dot(mean_x, mean_x.T))
+        exp_alpha = self.a_alpha_tilde / self.b_alpha_tilde
+        diag_exp_alpha = np.diag(exp_alpha.T[0])
+        tau_sum_xn = tau_exp * (self.N * self.sigma_z + np.dot(self.means_z, self.means_z.T))
         self.sigma_w = np.linalg.inv(diag_exp_alpha + tau_sum_xn)
 
         # update means_w
-        # einsum calculates for all k the summation over <x_n> * ( t_nk - mu_k)
-        einsum_result = np.einsum('kj,ij->ik', self.data - self.mean_mu, X[0])
+        # einsum calculates for all k the summation over <z_n> * ( X_nk - mu_k)
+        einsum_result = np.einsum('kj,ij->ik', X - self.mean_mu, self.means_z)
         self.means_w = np.dot(tau_exp * self.sigma_w, einsum_result)
 
     def __update_alpha(self):
