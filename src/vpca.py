@@ -35,17 +35,17 @@ class BayesianPCA(object):
     def __update_z(self, X):
         """
         updates Z
-        Z is the prod over datapoints: N(x_n | m_x, Sigma_n)
+        Z is the prod over datapoints: N(z_n | m_z, Sigma_n)
         X is the data
 
-        means_z^(n) = <tau> * Sigma_x * <W.T> * (X_n - <mu>)
+        means_z^(n) = <tau> * Sigma_z * <W.T> * (X_n - <mu>)
         Sigma_z = (I + <tau> <W.T*W>)^-1
         """
         # variables necessary in calculations
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
         mu_exp = self.mean_mu
         W_exp = self.means_w
-        WT_W_exp = np.dot(W_exp.T, W_exp); # TODO fix
+        WT_W_exp = np.dot(W_exp.T, W_exp) # TODO fix
 
         # update sigma, equal for all n's
         self.sigma_z = np.linalg.inv(np.eye(self.d) + tau_exp * WT_W_exp)
@@ -68,8 +68,8 @@ class BayesianPCA(object):
         self.sigma_mu = (1.0 / (self.beta + self.N * tau_exp)) * np.eye(self.d)
 
         # update mean_mu
-        sum_t_w_x = np.sum(X - np.dot(self.means_w, self.means_z), axis=1, keepdims=True)
-        self.mean_mu = np.dot(tau_exp * self.sigma_mu, sum_t_w_x)
+        sum_x_w_z = np.sum(X - np.dot(self.means_w, self.means_z), axis=1, keepdims=True)
+        self.mean_mu = np.dot(tau_exp * self.sigma_mu, sum_x_w_z)
 
     def __update_w(self, X):
         """
@@ -84,8 +84,8 @@ class BayesianPCA(object):
         # update sigma_w first as it is used in updating means_w
         exp_alpha = self.a_alpha_tilde / self.b_alpha_tilde
         diag_exp_alpha = np.diag(exp_alpha.T[0])
-        tau_sum_xn = tau_exp * (self.N * self.sigma_z + np.dot(self.means_z, self.means_z.T))
-        self.sigma_w = np.linalg.inv(diag_exp_alpha + tau_sum_xn)
+        tau_sum_zn = tau_exp * (self.N * self.sigma_z + np.dot(self.means_z, self.means_z.T))
+        self.sigma_w = np.linalg.inv(diag_exp_alpha + tau_sum_zn)
 
         # update means_w
         # einsum calculates for all k the summation over <z_n> * ( X_nk - mu_k)
@@ -98,7 +98,6 @@ class BayesianPCA(object):
 
         b_alpha_tilde[i] = b_alpha + < || w[i] ||^2 > / 2
         """
-
         # update each element in b_alpha_tilde
         # TODO: not sure, correction: pretty sure it is wrong
         w_norm = np.power(np.linalg.norm(self.means_w, axis=0), 2)
@@ -112,28 +111,27 @@ class BayesianPCA(object):
 
         b_tau_tilde = b_tau + 1/2 sum ( Z  )
         where Z =
-        || t_n || ^2 + <|| mu ||^2> + Tr(<W.T * W> <x_n * x_n.T>) +
-            2 * <mu.T> * <W> * <x_n> - 2 * t_n.T * <W> * <x_n> - 2 * t_n.T * <mu>
+        || X_n ||^2 + <|| mu ||^2> + Tr(<W.T * W> <z_n * z_n.T>) +
+            2*<mu.T> * <W> * <z_n> - 2 * X_n.T * <W> * <z_n> - 2 * X_n.T * <mu>
         """
-        mean_x, sigma_x = X
-        t_norm_sq = np.power(np.linalg.norm(self.data, axis=0), 2)
-        mu_norm_sq = np.power(np.linalg.norm(self.mean_mu, axis=0), 2)
+        x_norm_sq = np.power(np.linalg.norm(X, axis=0), 2)
+        exp_mu_norm_sq = np.power(np.linalg.norm(self.mean_mu, axis=0), 2)
 
         # TODO what is <W.T W>
-        #exp_wt_w = np.trace(self.sigma_w) + np.dot(self.means_w.T, self.means_w)
-        exp_wt_w = np.eye(self.d) # TODO fix
-        exp_x_xt = self.N * sigma_x + np.dot(mean_x, mean_x.T)
+        exp_w = self.means_w
+        exp_wt_w = np.dot(exp_w.T, exp_w) # TODO fix
+        exp_z_zt = self.N * self.sigma_z + np.dot(self.means_z, self.means_z.T)
 
-        trace_w_x = np.trace(np.dot(exp_wt_w, exp_x_xt))
+        trace_w_z = np.trace(np.dot(exp_wt_w, exp_z_zt))
 
-        mu_w_x = np.dot(np.dot(self.mean_mu.T, self.means_w), mean_x)
+        mu_w_z = np.dot(np.dot(self.mean_mu.T, self.means_w), self.means_z)
 
-        t_w_x = np.dot(self.data.T, self.means_w).T * mean_x
+        x_w_z = np.dot(X.T, self.means_w).T * self.means_z
 
-        t_mu = np.dot(self.data.T, self.mean_mu)
+        x_mu = np.dot(X.T, self.mean_mu)
 
-        big_sum = np.sum(t_norm_sq) + self.N * mu_norm_sq + trace_w_x + \
-                  2*np.sum(mu_w_x) - 2*np.sum(t_w_x) - 2*np.sum(t_mu)
+        big_sum = np.sum(x_norm_sq) + self.N * exp_mu_norm_sq + trace_w_z + \
+                  2*np.sum(mu_w_z) - 2*np.sum(x_w_z) - 2*np.sum(x_mu)
 
         self.b_tau_tilde = self.b_tau + 0.5*big_sum
 
