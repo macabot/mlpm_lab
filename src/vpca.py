@@ -218,9 +218,10 @@ def generate_data(N):
     return np.random.multivariate_normal(mean, covariance, N).T
 
 def run():
+    d = 10
     N = 2
     X = generate_data(N)
-    vpca = BayesianPCA(10, N)
+    vpca = BayesianPCA(d, N)
     vpca.fit(X)
 
 def run_shapes():
@@ -239,9 +240,11 @@ def test_default_shapes():
     vpca.test_shapes(shapes)
 
 def show_hinton():
-    vpca = BayesianPCA(10, 2)
-    X = [[0],0] # set X random
-    vpca.test_shapes(X)
+    d = 10
+    N = 2
+    X = generate_data(N)
+    vpca = BayesianPCA(d, N)
+    vpca.test_shapes_after_updates(X)
     hinton(vpca.means_w)
 
 def _blob(x,y,area,colour):
@@ -288,7 +291,7 @@ def hinton(W, maxWeight=None):
 
 if __name__ == '__main__':
     #run()
-    run_shapes()
-    #show_hinton()
+    #run_shapes()
+    show_hinton()
     #test_default_shapes()
 
