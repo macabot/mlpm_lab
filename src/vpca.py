@@ -32,47 +32,34 @@ class BayesianPCA(object):
         self.a_tau_tilde = np.abs(np.random.randn(1))
         self.b_tau_tilde = np.abs(np.random.randn(1))
 
-        # set data
-        Sigma = np.diag([5,4,3,2,1,1,1,1,1,1])
-        self.data = np.random.multivariate_normal(np.zeros(d), Sigma, N).T
-
-
     def __update_z(self, X):
         """
-        updates X
-        X is the prod over datapoints: N(x_n | m_x, Sigma_n)
-        X[0][n] stands for nth mean
-        X[1] stands for sigma
+        updates Z
+        Z is the prod over datapoints: N(x_n | m_x, Sigma_n)
+        X is the data
 
-        m_x = <tau> * E_x * <W^t> * (t_n - <mu>)
-        E_x = (I + <tau> <W^t*W>)^-1
-
+        means_z^(n) = <tau> * Sigma_x * <W.T> * (X_n - <mu>)
+        Sigma_z = (I + <tau> <W.T*W>)^-1
         """
-
-        # TODO: what is self.means_z and self.sigma_z if not those of X?
-
-
         # variables necessary in calculations
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
         mu_exp = self.mean_mu
-        WT_W_exp = 0; # TODO
-        WT_exp = self.means_w.T
+        W_exp = self.means_w
+        WT_W_exp = np.dot(W_exp.T, W_exp); # TODO fix
 
         # update sigma, equal for all n's
-        X[1] = np.linalg.inv(np.eye(self.d,self.d) + tau_exp * WT_W_exp)
+        self.sigma_z = np.linalg.inv(np.eye(self.d) + tau_exp * WT_W_exp)
 
-        # update mean TODO
-        #X[0] = np.dot(np.dot( tau_exp * X[1], WT_exp), (self.data - mu_exp))
-        X[0] = np.random.randn(self.data.shape[0], self.data.shape[1])
-
+        # update mean
+        self.means_z = np.dot(np.dot( tau_exp * self.sigma_z, W_exp.T), (X - mu_exp))
+        
     def __update_mu(self, X):
         """
         update mean_mu and sigma_mu
 
         sigma_mu = (beta + N * <tau>)^-1 * I
-        mean_mu = <tau> * sigma_mu * sum( data_n - <W> * <X_n> )
+        mean_mu = <tau> * sigma_mu * sum( X_n - <W> * <z_n> )
         """
-
         # necessary for calculations of both
         tau_exp = self.a_tau_tilde / self.b_tau_tilde
 
@@ -80,10 +67,8 @@ class BayesianPCA(object):
         self.sigma_mu = (1.0 / (self.beta + self.N * tau_exp)) * np.eye(self.d)
 
         # update mean_mu
-        m_x, sigma_x = X
-        sum_t_w_x = np.sum(self.data - np.dot(self.means_w, m_x), axis=1, keepdims=True)
+        sum_t_w_x = np.sum(X - np.dot(self.means_w, self.means_z), axis=1, keepdims=True)
         self.mean_mu = np.dot(tau_exp * self.sigma_mu, sum_t_w_x)
-
 
     def __update_w(self, X):
         """
@@ -177,87 +162,90 @@ class BayesianPCA(object):
             # TODO: decide on converged
 
 
-    def test_shapes(self, X):
+    def test_shapes_after_updates(self, X):
         """
         This test simply tests whether the shapes of the
         important variables change. If they do, a warning is produced
         """
-
-
         shapes = self.get_shapes()
         # run tests while updating
         self.__update_z(X)
-        self.test_shape(shapes, X)
+        self.test_shapes(shapes)
 
         self.__update_mu(X)
-        self.test_shape(shapes, X)
+        self.test_shapes(shapes)
 
         self.__update_w(X)
-        self.test_shape(shapes, X)
+        self.test_shapes(shapes)
 
         self.__update_alpha()
-        self.test_shape(shapes, X)
+        self.test_shapes(shapes)
 
         self.__update_tau(X)
-        self.test_shape(shapes, X)
+        self.test_shapes(shapes)
 
 
     def get_shapes(self):
         """
-        Returns the shape of all important variables in vpca
+        Returns the shape of all variables in vpca
         """
+        shapes = [(self.means_z.shape, 'means_z'),
+                  (self.sigma_z.shape, 'sigma_z'),
+                  (self.mean_mu.shape, 'mean_mu'),
+                  (self.sigma_mu.shape, 'sigma_mu'),
+                  (self.means_w.shape, 'means_w'),
+                  (self.sigma_w.shape, 'sigma_w'),
+                  (self.a_alpha_tilde.shape, 'a_alpha_tilde'),
+                  (self.b_alpha_tilde.shape, 'b_alpha_tilde'),
+                  (self.a_tau_tilde.shape, 'a_tau_tilde'),
+                  (self.b_tau_tilde.shape, 'b_tau_tilde')]
 
-        m_mu_shape = copy.copy(self.mean_mu.shape)
-        s_mu_shape = copy.copy(self.sigma_mu.shape)
+        return shapes
 
-        m_w_shape = copy.copy(self.means_w.shape)
-        s_w_shape = copy.copy(self.sigma_w.shape)
-
-        b_a_t_shape = copy.copy(self.b_alpha_tilde.shape)
-        b_t_t_shape = copy.copy(self.b_tau_tilde.shape)
-
-        return (m_mu_shape, s_mu_shape, m_w_shape, s_w_shape, b_a_t_shape, b_t_t_shape)
-
-    def test_shape(self, orig_shapes, X):
+    def test_shapes(self, shapes):
         """
         Tests whether the shapes in oldvpca are equal to those in
         newvpca
         """
-
-        print("Testing shapes")
-
-        assert orig_shapes[0] == self.mean_mu.shape, "mean_mu: " + str(self.mean_mu.shape) + ", should have been: " + str(orig_shapes[0])
-
-        assert orig_shapes[1] == self.sigma_mu.shape, 'sigma_mu: ' + str(self.sigma_mu.shape) + ', should have been: ' + str(orig_shapes[1])
-
-        assert orig_shapes[2] == self.means_w.shape, 'means_w: ' + str(self.means_w.shape) + ', should have been: ' + str(orig_shapes[2])
-
-        assert orig_shapes[3] == self.sigma_w.shape, 'sigma_w: ' + str(self.sigma_w.shape) + ', should have been: ' + str(orig_shapes[3])
-
-        assert orig_shapes[4] == self.b_alpha_tilde.shape, 'b_alpha_tilde: ' + str(self.b_alpha_tilde.shape) + ', should have been: ' + str(orig_shapes[4])
-
-        assert orig_shapes[5] == self.b_tau_tilde.shape, 'b_tau_tilde: ' + str(self.b_tau_tilde.shape) + ', should have been: ' + str(orig_shapes[5])
+        for orig_shape, name in shapes:
+            var_shape = eval("self.%s.shape" % name)
+            assert orig_shape == var_shape, "%s: %s should have been %s" % (name, var_shape, orig_shape)
+            
+        print 'correct shapes'
 
 
-        print("Testing succceeded")
-
+def generate_data(N):
+    mean = np.zeros(10)
+    covariance = np.diag([5,4,3,2,1,1,1,1,1,1])
+    return np.random.multivariate_normal(mean, covariance, N).T
 
 def run():
-    vpca = BayesianPCA(10, 2)
-    X = [[0],0] # set X random
+    N = 2
+    X = generate_data(N)
+    vpca = BayesianPCA(10, N)
     vpca.fit(X)
 
 def run_shapes():
-    vpca = BayesianPCA(10, 2)
-    X = [[0],0] # set X random
-    vpca.test_shapes(X)
+    d = 10
+    N = 2
+    X = generate_data(N)
+    vpca = BayesianPCA(d, N)
+    vpca.test_shapes_after_updates(X)
     
+def test_default_shapes():
+    d = 10
+    N = 2
+    X = generate_data(N)
+    vpca = BayesianPCA(d, N)
+    shapes = vpca.get_shapes()
+    vpca.test_shapes(shapes)
+
 def show_hinton():
     vpca = BayesianPCA(10, 2)
     X = [[0],0] # set X random
     vpca.test_shapes(X)
     hinton(vpca.means_w)
-    
+
 def _blob(x,y,area,colour):
     """
     Source: http://wiki.scipy.org/Cookbook/Matplotlib/HintonDiagrams
@@ -272,8 +260,8 @@ def _blob(x,y,area,colour):
 def hinton(W, maxWeight=None):
     """
     Source: http://wiki.scipy.org/Cookbook/Matplotlib/HintonDiagrams
-    Draws a Hinton diagram for visualizing a weight matrix. 
-    Temporarily disables matplotlib interactive mode if it is on, 
+    Draws a Hinton diagram for visualizing a weight matrix.
+    Temporarily disables matplotlib interactive mode if it is on,
     otherwise this takes forever.
     """
     reenable = False
@@ -302,6 +290,7 @@ def hinton(W, maxWeight=None):
 
 if __name__ == '__main__':
     #run()
-    #run_shapes()
-    show_hinton()
+    run_shapes()
+    #show_hinton()
+    #test_default_shapes()
 
