@@ -115,7 +115,9 @@ class BayesianPCA(object):
             2*<mu.T> * <W> * <z_n> - 2 * X_n.T * <W> * <z_n> - 2 * X_n.T * <mu>
         """
         x_norm_sq = np.power(np.linalg.norm(X, axis=0), 2)
-        exp_mu_norm_sq = np.power(np.linalg.norm(self.mean_mu, axis=0), 2)
+        # <|mu|^2> = <mu.T mu> = Tr(Sigma_mu) + mean_mu.T mean_mu
+        exp_mu_norm_sq = np.trace(self.sigma_mu) + np.dot(self.mean_mu.T, self.mean_mu)
+        exp_mu_norm_sq = exp_mu_norm_sq[0] # reshape from (1,1) to (1,)
 
         # TODO what is <W.T W>
         exp_w = self.means_w
