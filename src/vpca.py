@@ -104,11 +104,10 @@ class BayesianPCA(object):
         b_alpha_tilde[i] = b_alpha + < || w[i] ||^2 > / 2
         """
         # update each element in b_alpha_tilde
-        # TODO: not sure, correction: pretty sure it is wrong
-        w_norm = np.power(np.linalg.norm(self.means_w, axis=0), 2)
-        w_norm = np.reshape(w_norm, (self.d, 1)) # reshape from (d,) to (d,1)
+        exp_w_norm_sq = np.trace(self.sigma_w) + np.sum(np.power(self.means_w, 2), axis=0)
+        exp_w_norm_sq = np.reshape(exp_w_norm_sq, (self.d, 1)) # reshape from (d,) to (d,1)
 
-        self.b_alpha_tilde = self.b_alpha + w_norm / 2
+        self.b_alpha_tilde = self.b_alpha + exp_w_norm_sq / 2
 
     def __update_tau(self, X):
         """
