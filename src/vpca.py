@@ -1,4 +1,9 @@
-import copy
+"""
+By Michael Cabot, Sammie Katt and Richard Rozeboom
+
+Requires Python 2.7 and NumPy 1.8
+"""
+
 import pylab as pl
 import numpy as np
 
